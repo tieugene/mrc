@@ -1,0 +1,17 @@
+SAFE_USER_AGENT         = "Mozilla/5.0 (X11; Linux x86_64; rv:65.0) Gecko/20100101 Firefox/65.0";
+AUTH_DOMAIN             = "https://auth.mail.ru";
+AUTH_ENDPOINT               = AUTH_DOMAIN + "/cgi-bin/auth";
+SCLD_COOKIE_ENDPOINT        = AUTH_DOMAIN + "/sdc";
+CLOUD_DOMAIN            = "https://cloud.mail.ru";
+SCLD_PUBLICLINK_ENDPOINT    = CLOUD_DOMAIN + "/public";
+SCLD_TOKEN_ENDPOINT         = CLOUD_DOMAIN + "/api/v2/tokens/csrf";
+SCLD_SHARD_ENDPOINT         = CLOUD_DOMAIN + "/api/v2/dispatcher";
+SCLD_SPACE_ENDPOINT         = CLOUD_DOMAIN + "/api/v2/user/space";
+SCLD_FOLDER_ENDPOINT        = CLOUD_DOMAIN + "/api/v2/folder";
+SCLD_ADDFOLDER_ENDPOINT         = SCLD_FOLDER_ENDPOINT + "/add";
+SCLD_FILE_ENDPOINT          = CLOUD_DOMAIN + "/api/v2/file";
+SCLD_ADDFILE_ENDPOINT           = SCLD_FILE_ENDPOINT + "/add";
+SCLD_PUBLISHFILE_ENDPOINT       = SCLD_FILE_ENDPOINT + "/publish";
+SCLD_REMOVEFILE_ENDPOINT        = SCLD_FILE_ENDPOINT + "/remove";
+SCLD_RENAMEFILE_ENDPOINT        = SCLD_FILE_ENDPOINT + "/rename";
+SCLD_MOVEFILE_ENDPOINT          = SCLD_FILE_ENDPOINT + "/move";
