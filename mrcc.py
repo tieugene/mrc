@@ -7,7 +7,7 @@
 # - https://github.com/mad-gooze/PyMailCloud - python tricks
 
 import os, json
-from mrc import MarcRestClient
+from mrc import MailRuCloudClient
 from cmd import Cmd
 
 def load_account():
@@ -55,50 +55,57 @@ class   Terminal(Cmd):
     def __scpath(self):
         return '/' + '/'.join(self.cpath)
 
+    def do_EOF(self, args):
+        'Exit'
+        print()
+        return True
+
     def do_exit(self, args):
+        'Exit'
         return True
 
     def do_quit(self, args):
+        'Quit'
         return True
 
     def do_pwd(self, args):
-        'Print current remote path'
+        'Print current remote path (ftp PWD)'
         print(self.__scpath())
 
     def do_ls(self, args):
-        'List folder'
+        'List folder (ftp LIST)'
         print(json.dumps(self.mrc.ls(self.__scpath()), sort_keys=True, indent=1, ensure_ascii=False))
 
     def do_cd(self, args):
-        'Change current folder
+        'Change current folder (ftp C[W]D)'
         # construct new path (os.path.abspath())
         # check if exists => download
         # cwd
         self.cpath.append(args)
 
     def do_md(self, args):
-        'Make folder'
+        'Make folder (ftp MKD[IR])'
         # TODO: check available chars
         pass
 
     def do_rd(self, args):
-        'Delete folder'
+        'Delete folder (ftp RMD[IR])'
         pass
 
     def do_get(self, args):
-        'Download file'
+        'Download file (ftp GET)'
         pass
 
     def do_put(self, args):
-        'Upload file'
+        'Upload file (ftp PUT)'
         pass
 
     def do_rm(self, args):
-        'Delete file'
+        'Delete file (ftp DELE[TE])'
         pass
 
     def do_mv(self, args):
-        'Rename/move file/folder'
+        'Rename/move file/folder (ftp ?)'
         pass
 
     def do_lpwd(self, args):
@@ -118,11 +125,20 @@ class   Terminal(Cmd):
         else:
             print('Folder `%s` does not exists' % npath)
 
+    def do_mget(self, args):
+        'Multiple get (ftp MGET)'
+
+    def do_mput(self, args):
+        'Multiple put (ftp MPUT)'
+
+    def do_test(self, args):
+        'Just for tests'
+        self.mrc.test()
 
 def main():
-    mrc = MarcRestClient()
+    mrc = MailRuCloudClient()
     login, password = load_account()
-    mrc.log_in(login, password)
+    mrc.login(login, password)
     t = Terminal(mrc)
     t.cmdloop()
     #print(json.dumps(mrc.ls('/8'), sort_keys=True, indent=1, ensure_ascii=False))
