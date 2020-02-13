@@ -94,21 +94,17 @@ T
 ### File:
 
 - entity:
-  - kind:str
-  - type:str
+  - kind:str=folder/file
+  - type:str=folder/file
   - home:str - full path (/...)
-  - name:str - folder/file name
-  - size:int
+  - name:str - name
+  - [size:int] - folder: in folder? request only
 - Folder(entity):
-  - kind:str=folder
-  - type:str=folder
   - count:{files:int, folders:int}
   - grev:int
   - rev:int
   - tree:int?
 - File(entity):
-  - kind:str=file
-  - type:str=file
   - hash:hex(40X) - ?SHA-1
   - mtime:int - ?unixtime
   - virus_scan:str = "pass"
