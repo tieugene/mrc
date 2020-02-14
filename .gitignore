@@ -1,3 +1,5 @@
 .idea
 __old__
+__pycache__
 __tmp__
+*.pyc

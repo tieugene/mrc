@@ -114,7 +114,7 @@ class MailRuCloudClient:
         Get Cloud cookie for authorized user (6 sec).
         :return: True if ok
         """
-        dprint("Cloud cookie...", end='')
+        dprint("Cookie...", end='')
         # TODO: check cookies on .auth.mail.ru entries B4
         response = self.__session.get(url=SCLD_COOKIE_ENDPOINT, params={'from': CLOUD_DOMAIN})
         if ((response) and (self.__session.cookies) and (self.__session.cookies.get('sdcs', domain='.cloud.mail.ru'))):
@@ -178,7 +178,21 @@ class MailRuCloudClient:
                 self.__get_download_source()
         )
 
-    def __do_get(self, endpoint: str, params: dict) -> object:
+    def exists(self, path:str) -> bool:
+        """
+        Test entry exists (B4 creating)
+        :param path: entry to test
+        :return: exists
+        """
+        return self.__session.head(
+            url=url,
+            params={
+                "home": path,
+                "token": self.__token,
+            }
+        ).status_code == 200
+
+    def __do_get(self, endpoint: str, params: dict = {}) -> object:
         """
         Do get request. Handle token[, 404]
         :param endpoint: path after CLOUD_DOMAIN
@@ -199,6 +213,10 @@ class MailRuCloudClient:
             return response
         print(f"Status: {response.status_code}")
 
+    def df(self) -> dict:
+        """Space used"""
+        return self.__do_get(SCLD_SPACE_ENDPOINT).json()['body']
+
     def info(self, path: str) -> dict:
         """
         Check entry. Do get file?home=path.
@@ -211,7 +229,7 @@ class MailRuCloudClient:
             {'home': path}
         ).json()['body'] # strip email,status[200],time
 
-    def folder_add(self, path, resolve):
+    def _folder_add(self, path, resolve):
         """
         Create new folder
         :param path:
@@ -232,7 +250,7 @@ class MailRuCloudClient:
             {'home': path}  # skipped: limit, offset, sort_order, sort_type
         ).json()['body']
 
-    def folder_rename(self, path, new_name):
+    def _folder_rename(self, path, new_name):
         """
         ???
         Rename folder inplace
@@ -242,7 +260,7 @@ class MailRuCloudClient:
         """
         pass
 
-    def folder_move(self, path, new_folder):
+    def _folder_move(self, path, new_folder):
         """
         ???
         Move folder into new place.
@@ -252,7 +270,7 @@ class MailRuCloudClient:
         """
         pass
 
-    def folder_del(self, path):
+    def _folder_del(self, path):
         """
         Delete folder
         :param path: folder to del
@@ -260,7 +278,7 @@ class MailRuCloudClient:
         """
         pass
 
-    def file_add(self, path, src_path, resolve):
+    def _file_add(self, path, src_path, resolve):
         """
         Create (upload) new file
         :param path:
@@ -270,7 +288,7 @@ class MailRuCloudClient:
         """
         pass
 
-    def file_read(self, path, dst_path):
+    def _file_read(self, path, dst_path):
         """
         Read (download) file
         :param path:
@@ -278,7 +296,7 @@ class MailRuCloudClient:
         :return: Ok/403/404
         """
 
-    def file_rename(self, path, new_name, resolve):
+    def _file_rename(self, path, new_name, resolve):
         """
         Rename file inplace
         :param path:
@@ -288,7 +306,7 @@ class MailRuCloudClient:
         """
         pass
 
-    def file_move(self, path, new_path, resolve):
+    def _file_move(self, path, new_path, resolve):
         """
         Move file into new place
         :param path:
@@ -298,7 +316,7 @@ class MailRuCloudClient:
         """
         pass
 
-    def file_del(self, path):
+    def _file_del(self, path):
         """
         Delete file
         :param path:
@@ -306,7 +324,7 @@ class MailRuCloudClient:
         """
         pass
 
-    def _test1(self):
+    def __test_f(self):
         """
         Test combinations of folder/file?home=folder/file with misc Referers
         :return: None
@@ -323,3 +341,17 @@ class MailRuCloudClient:
                 )
                 if response:
                     pprint.pprint(response.text)
+
+    def __test_exists(self, path):
+        """Test entry exists"""
+        def __try(url, name):
+            response: Response = self.__session.head(
+                url=url,
+                params={
+                    "home": path,
+                    "token": self.__token,
+                }
+            )
+            print(f'{name}: {response.status_code}')
+        __try(SCLD_FILE_ENDPOINT, 'File')
+        __try(SCLD_FOLDER_ENDPOINT, 'Folder')
