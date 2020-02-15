@@ -11,8 +11,10 @@ import os
 import re
 import datetime
 import pprint
-from cmd import Cmd
+import warnings
+import cmd
 from mrc import MailRuCloudClient
+from oops import MailRuCloudError
 
 INVALID_FOLDER_CHARS = "\"*:<>?\\|"
 INVALID_FOLDER_MASK = re.compile('["*:<>?\\\|]')
@@ -38,7 +40,7 @@ def load_account():
     return __load_str(data, 'username'), __load_str(data, 'password')
 
 
-class Terminal(Cmd):
+class Terminal(cmd.Cmd):
     """
     https://docs.python.org/3.6/library/cmd.html
     https://stackoverflow.com/questions/9340391/python-interactive-shell-type-application
@@ -79,7 +81,11 @@ class Terminal(Cmd):
         :return: dict (entry info) or bool (is folder/file)
         TODO: handle 404
         """
-        i = self.__mrc.info(path)
+        try:
+            i = self.__mrc.info(path)
+        except MailRuCloudError.NotLoggedIn:
+            print('Please log in')
+            return
         if i:
             if (isfolder is None):  # get info
                 return i
@@ -120,6 +126,8 @@ class Terminal(Cmd):
         if i:
             for k, v in i.items():
                 print(f'{k}: {v}')
+        else:
+            warnings.warn("Empty body")
 
     def do_pwd(self, args):
         """Print current remote path (ftp PWD)"""

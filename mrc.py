@@ -3,10 +3,9 @@
 
 import os, sys, time, json, requests
 import pprint
-
 from requests import Response
-
 from const import *
+from oops import MailRuCloudError, MailRuCloudWarning
 
 DEBUG = True
 GOOD_RESPONSE = set((200, 201, 302))  # OK, Created, Found (temporary moved)
@@ -178,6 +177,10 @@ class MailRuCloudClient:
                 self.__get_download_source()
         )
 
+    def __chk_token(self):
+        if not self.__token:
+            raise MailRuCloudError.NotLoggedIn()
+
     def exists(self, path:str) -> bool:
         """
         Test entry exists (B4 creating)
@@ -236,6 +239,9 @@ class MailRuCloudClient:
 
     def df(self) -> dict:
         """Space used"""
+        if not self.__token:
+            raise MailRuCloudWarning.NotLoggedIn()  # get out
+        print("Go further")
         return self.__do_get(SCLD_SPACE_ENDPOINT).json()['body']
 
     def info(self, path: str) -> dict:
@@ -245,6 +251,7 @@ class MailRuCloudClient:
         :param path:
         :return: response body or None
         """
+        self.__chk_token()  # get out
         return self.__do_get(
             SCLD_FILE_ENDPOINT,
             {'home': path}
