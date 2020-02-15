@@ -1,4 +1,7 @@
 # Notes
+- teach https://cloud.mail.ru/trashbin/ (move to, ls, delete)
+- teach https://cloud.mail.ru/favorites/
+0 try http delete, /folder/remove/
 
 ## Interestings:
 - [Cmd](https://docs.python.org/3.7/library/cmd.html)
@@ -134,3 +137,16 @@ GET file?
 ```
 {"email":"ti.eugene@mail.ru","body":{"count":{"folders":1,"files":2},"tree":"356165343634623030303030","name":"Digma_e65g","grev":13683,"kind":"folder","rev":13628,"type":"folder","home":"/tmp/Digma_e65g"},"time":1580943818684,"status":200}
 ```
+====
+mkdir /tmp/2. rev/grev
+B4:
+- /:        13852/13857
+- /tmp:     13857/13857
+After:
+- /:        13852/13858
+- /tmp:     13858/13858
+- /tmp/2:   13858/13858
+
+Guess:
+rev: изменился _состав_ и/или _размер_ _этой_ папки
+grev: ... подчиненной ...

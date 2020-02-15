@@ -125,10 +125,17 @@ class Terminal(Cmd):
         """Print current remote path (ftp PWD)"""
         print(self.__cpath)
 
+    def do_cd(self, args):
+        """Change current folder (ftp C[W]D)\nUsage: cd [folder] (default /)"""
+        path = self.__norm_path(args or '/')
+        if not self.__get_info(path, True):
+            print(f'`{path}` is not folder')
+            return
+        self.__cpath = path
+        self.__update_prompt()
+
     def do_ls(self, args):
         """List folder (ftp LIST)\nUsage: ls [-l] [folder]"""
-        # TODO: long = size + folders: grev, rev, tree; file: mtime, hash, virus, urls, msg)
-        # TODO: check folder tree != /'s tree
         # TODO: list template
         # TODO: cache
         __long = False
@@ -174,15 +181,6 @@ class Terminal(Cmd):
                 for f in i['list']:
                     print('{}{}'.format(f['name'], '/' if f['type'] == 'folder' else ''))
 
-    def do_cd(self, args):
-        """Change current folder (ftp C[W]D)\nUsage: cd [folder] (default /)"""
-        path = self.__norm_path(args or '/')
-        if not self.__get_info(path, True):
-            print(f'`{path}` is not folder')
-            return
-        self.__cpath = path
-        self.__update_prompt()
-
     def do_md(self, args):
         """Make folder (ftp MKD[IR])"""
         # TODO: exceptions of print>return
@@ -203,10 +201,12 @@ class Terminal(Cmd):
             print(f"`{path}` already exists")
             return
         parent = os.path.dirname(path)  # 5. parent not exists
-        if self.__mrc.exists(parent):
+        if not self.__mrc.exists(parent):
             print(f"Parent `{parent}` not exists")
-            return
-        # if parent exists
+            #return
+        rsp = self.__mrc.folder_add(path, 'rewrite')
+        print('Status: {}, Body:'.format(rsp.status_code))
+        print(rsp.content)
 
     def _do_rd(self, args):
         """Delete folder (ftp RMD[IR])"""

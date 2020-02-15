@@ -185,14 +185,14 @@ class MailRuCloudClient:
         :return: exists
         """
         return self.__session.head(
-            url=url,
+            url=SCLD_FILE_ENDPOINT,
             params={
                 "home": path,
                 "token": self.__token,
             }
         ).status_code == 200
 
-    def __do_get(self, endpoint: str, params: dict = {}) -> object:
+    def __do_get(self, endpoint: str, payload: dict = {}) -> object:
         """
         Do get request. Handle token[, 404]
         :param endpoint: path after CLOUD_DOMAIN
@@ -207,11 +207,32 @@ class MailRuCloudClient:
             url=endpoint,
             params={**{
                 "token": self.__token,
-            }, **params},
+            }, **payload},
         )
         if response:    # 200
             return response
         print(f"Status: {response.status_code}")
+
+    def __do_post(self, endpoint: str, payload: dict = {}) -> object:
+        """
+        Do get request. Handle token[, 404]
+        :param endpoint: path after CLOUD_DOMAIN
+        :param params: payload
+        :return: response body or None
+        """
+        # TODO: handle 400, 403, 404
+        # TODO: retry token
+        if not self.__token:    # FIXME: raise NotAuth
+            return
+        response = self.__session.post(
+            url=endpoint,
+            data={**{
+                "token": self.__token,
+            }, **payload},
+        )
+        #if response:    # 200
+        return response
+        #print(f"Status: {response.status_code}")
 
     def df(self) -> dict:
         """Space used"""
@@ -229,14 +250,21 @@ class MailRuCloudClient:
             {'home': path}
         ).json()['body'] # strip email,status[200],time
 
-    def _folder_add(self, path, resolve):
+    def folder_add(self, path:str, resolve:str = 'rewrite'):
         """
-        Create new folder
-        :param path:
-        :param resolve How to solve conflict - ignore (replace)/new name/reject
+        Create new folder.
+        Return body: {"email":<login>>,"body":<path>>,"time":<timestamp>,"status":200}
+        :param path: full path of folder to create
+        :param resolve: How to solve conflict - rewrite|rename|strict (ignore (replace)/new name/reject?)
         :return:
         """
-        pass
+        return self.__do_post(
+            SCLD_FOLDERADD_ENDPOINT,
+            {
+                'home': path,
+                'conflict': resolve,
+            }
+        )
 
     def folder_read(self, path):
         """
