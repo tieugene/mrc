@@ -1,7 +1,7 @@
 # Notes
 - teach https://cloud.mail.ru/trashbin/ (move to, ls, delete)
 - teach https://cloud.mail.ru/favorites/
-0 try http delete, /folder/remove/
+- try http delete, /folder/remove/
 
 ## Interestings:
 - [Cmd](https://docs.python.org/3.7/library/cmd.html)
@@ -24,6 +24,19 @@
 > В названии папок нельзя использовать символы «" * / : < > ? \ |». Также название не может состоять только из точки «.» или из двух точек «..»
 
 Invalid chars: `"*:<>?\|`
+
+Response status codes:
+- 200 - ok
+- 400 - Bad Request (e.g. required params absent)
+- 403 - Forbidden (no token)
+- 404 - Not Found (e.g. object really not exists)
+- 406 - Not Acceptable (e.g. /file/history for folder)
+
+Response content:
+- email: `account`
+- status: response code
+- time: unixtime
+- body: payload
 
 ## Start:
 SDC - Streamset Data Collector
@@ -62,52 +75,26 @@ SDC - Streamset Data Collector
   - Code: 200/403
 
 ## To find:
-- ask for folder/file stat ([g]rev | mtime|hash):
- - folder - file?home=<folder> 
- - file - file?home=<folder>
- - HEAD?
- - OPTIONS?
-- Cache (header) https://html5.by/blog/cache/:
+- [Cache](https://html5.by/blog/cache/):
   - ~~etag~~
   - ~~Last-Modified~~
   - ~~Expired~~: <Date>
   - ~~Cache-Control~~: no-store, no-cache, must-revalidate
   - Date
-- short query
 
-Note response:
-- status_code
-- headers (dict)
-- cookies (dict?)
-- text
-
-ls:
-
-Folder ... (x folders, y files, ...):
-==========================
-Type Size (<=2G) grev_rev_tree / mtime_hash
-= ====
-T 
-
-## Response:
-- status:int
-- time:int
-- email:<email>
-- body:<entry>
-### File:
-
-- entity:
+### Entry:
+- common:
   - kind:str=folder/file
   - type:str=folder/file
   - home:str - full path (/...)
   - name:str - name
   - [size:int] - folder: in folder? request only
-- Folder(entity):
+- Folder:
   - count:{files:int, folders:int}
   - grev:int
   - rev:int
   - tree:int?
-- File(entity):
+- File:
   - hash:hex(40X) - ?SHA-1
   - mtime:int - ?unixtime
   - virus_scan:str = "pass"
@@ -115,28 +102,6 @@ T
   - ["weblink:str - after ("EDAS/ZegcnyJrJ")]
   - ["weblink_access_rights:str = "r"]
 
-## Note request file/folder? (!):
-- Referer ни на что не влияет
-- Code == 200
-- file всегда отдает [короткие] метаданные объекта
-- folder всегда отдает полные метаданные папки
-- содержимое - https://cloud.mail.ru/api/v2/dispatcher['body']['get'][0]['url']
-
-GET folder?home=/tmp/Digma_e65g
-- home: /tmp/Digma_e65g
-- sort: {"type":"name","order":"asc"}
-- offset: 0
-- limit: 500
-- api: 2
-Прилетает весь folder json
-
-GET file?
-- home: /tmp/Digma_e65g
-- api: 2
-- Прилетает краткий folder json:
-```
-{"email":"ti.eugene@mail.ru","body":{"count":{"folders":1,"files":2},"tree":"356165343634623030303030","name":"Digma_e65g","grev":13683,"kind":"folder","rev":13628,"type":"folder","home":"/tmp/Digma_e65g"},"time":1580943818684,"status":200}
-```
 ====
 mkdir /tmp/2. rev/grev
 B4:

@@ -5,7 +5,7 @@ import os, sys, time, json, requests
 import pprint
 from requests import Response
 from const import *
-from oops import MailRuCloudError, MailRuCloudWarning
+from oops import MailRuCloudError
 
 DEBUG = True
 GOOD_RESPONSE = set((200, 201, 302))  # OK, Created, Found (temporary moved)
@@ -201,6 +201,7 @@ class MailRuCloudClient:
         :param endpoint: path after CLOUD_DOMAIN
         :param params: payload
         :return: response body or None
+        :exception: requests.exceptions.ReadTimeout
         """
         # TODO: handle 400, 403, 404
         # TODO: retry token
@@ -240,7 +241,7 @@ class MailRuCloudClient:
     def df(self) -> dict:
         """Space used"""
         if not self.__token:
-            raise MailRuCloudWarning.NotLoggedIn()  # get out
+            raise MailRuCloudError.NotLoggedIn()  # get out
         print("Go further")
         return self.__do_get(SCLD_SPACE_ENDPOINT).json()['body']
 
@@ -358,6 +359,39 @@ class MailRuCloudClient:
         :return: ok/403/404
         """
         pass
+
+    def any(self, method:str, url:str, payload:dict):
+        """
+        Fetch any request.
+        :param method: get/post/head
+        :type method: str
+        :param url: tail of v2 api
+        :type url: str
+        :param payload: subj
+        :return:Response
+        """
+        if not self.__token:    # FIXME: raise NotAuth
+            return
+        endpoint = CLOUD_APIv2 + url
+        if method == Rq.GET.value:
+            response = self.__session.get(
+                url=endpoint,
+                params={**{"token": self.__token}, **payload},
+            )
+        elif method == Rq.HEAD.value:
+            response = self.__session.head(
+                url=endpoint,
+                params={**{"token": self.__token}, **payload},
+            )
+        elif method == Rq.POST.value:
+            response = self.__session.post(
+                url=endpoint,
+                data={**{"token": self.__token}, **payload},
+            )
+        else:
+            dprint(f"Unknown method `{method}`")
+            return
+        return response
 
     def __test_f(self):
         """

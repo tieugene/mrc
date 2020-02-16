@@ -24,6 +24,7 @@ VIRUS_TEST = {
     'not_yet': '?'
 }
 
+
 def load_account():
     def __load_str(d, s):
         if s not in d:
@@ -211,7 +212,7 @@ class Terminal(cmd.Cmd):
         parent = os.path.dirname(path)  # 5. parent not exists
         if not self.__mrc.exists(parent):
             print(f"Parent `{parent}` not exists")
-            #return
+            # return
         rsp = self.__mrc.folder_add(path, 'rewrite')
         print('Status: {}, Body:'.format(rsp.status_code))
         print(rsp.content)
@@ -265,14 +266,36 @@ class Terminal(cmd.Cmd):
         else:
             print('Folder `%s` does not exists' % npath)
 
-    def doc_cmd(self, args):
+    def do_cmd(self, arg):
         """
-        Perform command to MRC API
-        cmd:enum get/post
-        url: endpoint
-        payload:dict - params/data dict
+        Perform command to MRC API\nUsage: cmd <method> <url> <payload>
+        - method:str get/post/head
+        - url:str tail after (e.g. /file/add)
+        - payload:dict - params/data
         :return status_code, content[:json]
+        example: cmd get /file {"home":"/tmp"}
         """
+        args = arg.split(' ', 2)
+        if len(args) != 3:
+            print('Wrong args number')
+            return
+        if args[0] not in set(('get', 'post', 'head')):
+            print('Bad method')
+            return
+        if not args[1].startswith('/'):
+            print('Bad url')
+            return
+        try:
+            payload = json.loads(args[2])
+        except:
+            print('Bad payload')
+            return
+        else:
+            res = self.__mrc.any(args[0], args[1], payload)
+            print(f'Code: {res.status_code}')
+            #if res.content:
+            #json.dumps(res.json(), indent=1)
+            pprint.pprint(res.json()['body'])
 
     def do_test(self, args):
         """Just for tests"""
