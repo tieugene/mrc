@@ -265,6 +265,15 @@ class Terminal(cmd.Cmd):
         else:
             print('Folder `%s` does not exists' % npath)
 
+    def doc_cmd(self, args):
+        """
+        Perform command to MRC API
+        cmd:enum get/post
+        url: endpoint
+        payload:dict - params/data dict
+        :return status_code, content[:json]
+        """
+
     def do_test(self, args):
         """Just for tests"""
         self.__mrc._test_exists(args)
