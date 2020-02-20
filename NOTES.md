@@ -88,6 +88,9 @@ SDC - Streamset Data Collector
   - type:str=folder/file
   - home:str - full path (/...)
   - name:str - name
+  - [message:str = ""]
+  - ["weblink:str - after ("EDAS/ZegcnyJrJ")]
+  - ["weblink_access_rights:str = "r"]
   - [size:int] - folder: in folder? request only
 - Folder:
   - count:{files:int, folders:int}
@@ -98,9 +101,6 @@ SDC - Streamset Data Collector
   - hash:hex(40X) - ?SHA-1
   - mtime:int - ?unixtime
   - virus_scan:str = "pass"
-  - [message:str = ""]
-  - ["weblink:str - after ("EDAS/ZegcnyJrJ")]
-  - ["weblink_access_rights:str = "r"]
 
 ====
 mkdir /tmp/2. rev/grev
@@ -115,3 +115,9 @@ After:
 Guess:
 rev: изменился _состав_ и/или _размер_ _этой_ папки
 grev: ... подчиненной ...
+
+==== Download ====
+1. https://cloud.mail.ru/public/31Zh/4bBd2Ujau - получаем печеньки
+~~GET https://cloud.mail.ru/api/v2/dispatcher =>~~ 
+2. POST: https://cloud.mail.ru/api/v2/tokens/download => token	37448c4f5478e0386594e9a3efbd845d3323e52a + file?
+~~GET https://cloclo10.cldmail.ru/2xiL6QhmiaWNT2EUhRnk/G/31Zh/4bBd2Ujau?key=37448c4f5478e0386594e9a3efbd845d3323e52a~~

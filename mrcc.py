@@ -145,6 +145,8 @@ class Terminal(cmd.Cmd):
 
     def do_ls(self, args):
         """List folder (ftp LIST)\nUsage: ls [-l] [folder]"""
+        # FIXME: message, weblink, weblink_access_rights for folders
+        # FIXME: rights = R[ead](+W[загрузка] - folders only)
         # TODO: list template
         # TODO: cache
         __long = False

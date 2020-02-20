@@ -3,6 +3,10 @@
   * [OpenAPI](https://github.com/OAI/OpenAPI-Specification) ([editor](https://editor.swagger.io))
   * [and](https://swagger.io/docs/specification/about/)
   * powered by [retext](https://github.com/retext-project/retext)
+* explore unknown endpoints:
+  * dispatcher/*
+  * tokens
+  * folder/shared
 * mcc:
   * raw output
   * log on/off
