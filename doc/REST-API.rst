@@ -214,11 +214,11 @@ Common
     :406:
         Not Acceptable (e.g. /file/history for folder)
 
-Entry
-~~~~~
+Entry (5)
+~~~~~~~~~
 
-Entry Info
-``````````
+Info
+````
 
 :Resource: /file
 :Method: GET
@@ -227,129 +227,114 @@ Entry Info
     :home: *Path*
 :Response:
 
-Copy Entry
-``````````
+Copy
+````
 
 :Resource: /file/copy
 :Method: POST
 :Description: Copy *Entry* into other folder
 :Parameters:
-    :home: *Path*
-    :folder: Path of folder copy to
-    :conflict: rename/.../... (Usual rename)
-:Response:
+    :home: *Path* - entry to copy
+    :folder: *Path* - folder copy to
+    :conflict: `rename|rewrite|strict` (usual rename)
+:Response: new path
 
-Move Entry
-``````````
+Move
+````
 
 :Resource: /file/move
 :Method: POST
-:Description: Move folder/file into other folder
+:Description: Move *Entry* into other folder
 :Parameters:
-    :home: Path.
-    :folder: Path of folder move to
-    :conflict: rename/.../... Usual rename
+    :home: *Path* - Entry to move
+    :folder: *Path* - Folder move to
+    :conflict: `rename|rewrite|strict` (usual rename)
 :Response:
 
-Rename Entry
-````````````
+Rename
+``````
 
 :Resource: /file/rename
 :Method: POST
-:Description: Rename folder/file inplace (?)
+:Description: Rename *Entry* inplace
 :Parameters:
-    :home: Path.
-    :folder: Path of folder copy to
-    :conflict: rename/.../... Usual rename
-:Response:
+    :home: *Path* - Entry to rename
+    :name: *Name* - new name
+    :conflict: `rename|rewrite|strict` (usual rename)
+:Response: new path
 
-Remove Entry
-````````````
+Remove
+``````
 
 :Resource: /file/remove
 :Method: POST
-:Description: Remove folder/file into *Trashbin*
+:Description: Remove Entry into *Trashbin*
 :Parameters:
-    :home: Path.
-    :folder: Path of folder copy to
-    :conflict: rename/.../... Usual rename
-:Response:
+    :home: *Path* - entry to remove
+    :hash?: ...
+    :~~conflict~~: ...
+:Response: path
 
-Files
-~~~~~
+File
+~~~~
 
 Upload File
 ```````````
 
 :Resource: /file/add
 :Method: POST
-:Description: Delete folder/file (into Trashbin)
+:Description: Upload file
 :Parameters:
-    :home: Path.
-    :folder: Path of folder copy to
-    :conflict: rename/.../... Usual rename
 :Response:
-:Error Codes:
-        :401: If the user is not authorized to list bookmarks
 
 File History
 ````````````
 
 :Resource: /file/history
 :Method: GET
-:Description: Delete folder/file (into Trashbin)
+:Description: List file history
 :Parameters:
-    :home: Path.
-    :folder: Path of folder copy to
-    :conflict: rename/.../... Usual rename
+    :home: *Path*
 :Response:
-:Error Codes:
-        :401: If the user is not authorized to list bookmarks
 
 Folder
 ~~~~~~
-
-Create Folder
-`````````````
-
-:Resource: /folder/add
-:Method: POST
-:Description: Delete folder/file (into Trashbin)
-:Parameters:
-    :home: Path.
-    :folder: Path of folder copy to
-    :conflict: rename/.../... Usual rename
-:Response:
-:Error Codes:
-        :401: If the user is not authorized to list bookmarks
 
 List Folder
 ```````````
 
 :Resource: /folder
 :Method: GET
-:Description: Delete folder/file (into Trashbin)
+:Description: List folder content
 :Parameters:
-    :home: Path.
-    :folder: Path of folder copy to
-    :conflict: rename/.../... Usual rename
-:Response:
-:Error Codes:
-        :401: If the user is not authorized to list bookmarks
+    :home: *Path*
+    :[limit]: int
+    :[offset]: int
+    :sort:
+        :type: `name|mtime|size`
+        :order: `asc|desc`
+:Response: list[]
 
 Folder Tree
 ```````````
 
 :Resource: /folder/tree
 :Method: GET
-:Description: Delete folder/file (into Trashbin)
+:Description: List folders from /
 :Parameters:
-    :home: Path.
-    :folder: Path of folder copy to
-    :conflict: rename/.../... Usual rename
+    :home: *Path*
+:Response: list of `List Folder`s
+
+Create Folder
+`````````````
+
+:Resource: /folder/add
+:Method: POST
+:Description: Create new folder
+:Parameters:
+    :home: *Path*
+    :conflict: `rename|rewrite|strict` (usual rename)
 :Response:
-:Error Codes:
-        :401: If the user is not authorized to list bookmarks
 
 Trashbin
 ~~~~~~~~
@@ -359,64 +344,265 @@ List Trashbin
 
 :Resource: /trashbin
 :Method: GET
-:Description: Delete folder/file (into Trashbin)
+:Description: List *Trashbin* content
 :Parameters:
-    :home: Path.
-    :folder: Path of folder copy to
-    :conflict: rename/.../... Usual rename
 :Response:
-:Error Codes:
-        :401: If the user is not authorized to list bookmarks
 
-Clear Trashbin
+Empty Trashbin
 ``````````````
 
 :Resource: /trashbin/empty
 :Method: POST
-:Description: Delete folder/file (into Trashbin)
+:Description: Empty Trashbin
 :Parameters:
-    :home: Path.
-    :folder: Path of folder copy to
-    :conflict: rename/.../... Usual rename
 :Response:
-:Error Codes:
-        :401: If the user is not authorized to list bookmarks
 
-Misc
-~~~~
+Restore File
+````````````
+
+:Resource: /trashbin/empty
+:Method: POST
+:Description: Restore *File* from Trash
+:Parameters:
+    :path: *Path*
+    :restore_revisiion: int
+    :conflict: `rename|rewrite|strict` (usual rename)
+:Response:
+
+Sharing (16)
+~~~~~~~~~~~~
+* Public - 2+
+* Share out - 2+
+* Share in (invites) - 5+
+
+Publish
+```````
+
+:Resource: /file/publish
+:Method: POST
+:Description: Publish entry
+:Parameters:
+    :path: *Path*
+:Response: *Weblink*
+
+Unpublish
+`````````
+
+:Resource: /file/unpublish
+:Method: POST
+:Description: Unpublish entry
+:Parameters:
+    :weblink: *Weblink*
+:Response: *Weblink*
+
+Share folder
+````````````
+
+:Resource: /folder/share
+:Method: POST
+:Description: Share folder
+:Parameters:
+    :home: *Path*
+    :invite:
+        :email: guest
+        :access: `read_only`
+:Response:
+
+Unshare folder
+``````````````
+
+:Resource: /folder/unshare
+:Method: POST
+:Description: Unshare folder
+:Parameters:
+    :home: *Path*
+    :invite: email
+:Response:
+
+Mount shared
+````````````
+
+:Resource: /folder/mount
+:Method: POST
+:Description: Mount foreign share
+:Parameters:
+    :invite_token: ...
+    :conflict: `rename|rewrite|strict` (usual rename)
+:Response:
+
+Unmount shared
+``````````````
+
+:Resource: /folder/unmount
+:Method: POST
+:Description:
+:Parameters:
+    :home: *Path*
+    :clone_copy: `true|false`
+:Response:
+
+---
+``````````````
+
+:Resource: /folder/shared
+:Method: GET?
+:Description: ???
+:Parameters: ???
+:Response:
+    :403: user
+
+---
+``````````````
+
+:Resource: /folder/shared/incoming
+:Method: GET
+:Description:
+:Parameters:
+:Response:
+
+---
+``````````````
+
+:Resource: /folder/shared/info
+:Method: GET
+:Description:
+:Parameters:
+:Response:
+
+---
+``````````````
+
+:Resource: /folder/shared/links
+:Method: GET
+:Description:
+:Parameters:
+    :home: *Path*
+:Response:
+
+---
+``````````````
+
+:Resource: /folder/invites
+:Method: GET
+:Description: List incoming invites
+:Parameters:
+:Response:
+
+---
+``````````````
+
+:Resource: /folder/invites/info
+:Method: GET
+:Description: Get invite info
+:Parameters:
+    :invite_token: ...
+:Response:
+
+---
+``````````````
+
+:Resource: /folder/invites/reject
+:Method: POST
+:Description: Reject invite
+:Parameters:
+    :invite_token: ...
+:Response:
+
+Get Weblink info
+````````````````
+
+:Resource: /weblinks
+:Method: GET
+:Description: Get *Weblink* info
+:Parameters:
+    :weblink: *Weblink*
+:Response:
+
+Set share RO
+````````````
+
+:Resource: /weblinks/readonly
+:Method: POST
+:Description: Set published RO
+:Parameters:
+    :weblink: *Weblink*
+:Response:
+
+Set share RW
+````````````
+
+:Resource: /weblinks/writable
+:Method: POST
+:Description: Set published RW
+:Parameters:
+    :weblink: *Weblink*
+:Response:
+
+Misc (7)
+~~~~~~~~
+
+Get Token
+`````````
+
+:Resource: /tokens/csrf
+:Method: POST
+:Description:
+:Parameters:
+:Response:
+    :token: %32w
+
+Get anon? token
+```````````````
+
+:Resource: /tokens/download
+:Method: POST
+:Description:
+:Parameters:
+:Response:
+    :token: %40x
 
 Dispatcher
 ``````````
 
+:Resource: /dispatcher
+:Method: GET
+:Description: List usual urls
+:Parameters:
+:Response:
+
 User info
 `````````
+
+:Resource: /user
+:Method: GET
+:Description: Get all user's info
+:Parameters:
+:Response:
+
 
 User edit
 `````````
 
+:Resource: /user/edit
+:Method: POST
+:Description: Update user UI settings
+:Parameters:
+:Response:
+
 Used space
 ``````````
+
+:Resource: /user/space
+:Method: GET
+:Description: Get used/available space
+:Parameters:
+:Response:
 
 Zip
 ```
 
-Example
-```````
-
-:Headers:
-    :Accept:
-        :application/vnd.ez.api.BookmarkList+xml:  if set the list is returned in XML format
-        :application/vnd.ez.api.BookmarkList+json: if set the list is returned in JSON format
+:Resource: /zip
+:Method: GET
+:Description: Get ziped entries
+:Parameters:
 :Response:
-
-.. code:: http
-
-    HTTP/1.1 200 OK
-    Location: /bookmark
-    Accept-Patch:  application/vnd.ez.api.BookmarkList+(json|xml)
-    ETag: "<newEtag>"
-    Content-Type: <depending on accept header>
-    Content-Length: <length>
-
-:Error Codes:
-        :401: If the user is not authorized to list bookmarks
