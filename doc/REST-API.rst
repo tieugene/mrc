@@ -435,14 +435,14 @@ Unmount shared
 
 :Resource: /folder/unmount
 :Method: POST
-:Description:
+:Description: Unmount foreign share
 :Parameters:
     :home: *Path*
     :clone_copy: `true|false`
 :Response:
 
----
-``````````````
+???
+```
 
 :Resource: /folder/shared
 :Method: GET?
@@ -451,36 +451,36 @@ Unmount shared
 :Response:
     :403: user
 
----
-``````````````
+List invites (?)
+````````````````
 
 :Resource: /folder/shared/incoming
 :Method: GET
-:Description:
+:Description: List incoming invites (?)
 :Parameters:
 :Response:
 
----
-``````````````
+Published info (?)
+``````````````````
 
 :Resource: /folder/shared/info
 :Method: GET
-:Description:
+:Description: Get published entry info
 :Parameters:
 :Response:
 
----
-``````````````
+List ...
+````````
 
 :Resource: /folder/shared/links
 :Method: GET
-:Description:
+:Description: List ...
 :Parameters:
     :home: *Path*
 :Response:
 
----
-``````````````
+List invites
+````````````
 
 :Resource: /folder/invites
 :Method: GET
@@ -488,8 +488,8 @@ Unmount shared
 :Parameters:
 :Response:
 
----
-``````````````
+Invite info
+```````````
 
 :Resource: /folder/invites/info
 :Method: GET
@@ -498,8 +498,8 @@ Unmount shared
     :invite_token: ...
 :Response:
 
----
-``````````````
+Reject invite
+`````````````
 
 :Resource: /folder/invites/reject
 :Method: POST
@@ -508,12 +508,12 @@ Unmount shared
     :invite_token: ...
 :Response:
 
-Get Weblink info
+Get share info
 ````````````````
 
 :Resource: /weblinks
 :Method: GET
-:Description: Get *Weblink* info
+:Description: Get share (?) info
 :Parameters:
     :weblink: *Weblink*
 :Response:
