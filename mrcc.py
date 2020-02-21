@@ -8,6 +8,7 @@
 
 import json
 import os
+import sys
 import re
 import datetime
 import pprint
@@ -23,16 +24,29 @@ VIRUS_TEST = {
     'fail': 'x',
     'not_yet': '?'
 }
+CFG_PATH = '.config/mrc/config.json'
+DEBUG = True
 
 
-def load_account():
+def _dprint(s: str, end: str = '\n') -> None:
+    """
+    Prints debug info
+    :param s: to print
+    :param end: EOL separator
+    :return: None
+    """
+    if DEBUG:
+        print(s, file=sys.stderr, end=end, flush=True)
+
+
+def _load_account():
     def __load_str(d, s):
         if s not in d:
             print('Not found: ' + s)
             exit(1)
         return d[s]
 
-    CFG = os.path.join(os.path.expanduser('~'), '.config/marcfs/config.json')
+    CFG = os.path.join(os.path.expanduser('~'), CFG_PATH)
     if not os.path.exists(CFG):
         print('Please fill out ' + CFG)
         exit(1)
@@ -74,25 +88,6 @@ class Terminal(cmd.Cmd):
             retvalue = os.path.normpath(self.__cpath + '/' + path)
         return retvalue
 
-    def __get_info(self, path: str, isfolder: bool = None):
-        """
-        Get/test entry info.
-        :param path: entry to get/test
-        :param isfolder: None - get info, True - folder, False - file
-        :return: dict (entry info) or bool (is folder/file)
-        TODO: handle 404
-        """
-        try:
-            i = self.__mrc.info(path)
-        except MailRuCloudError.NotLoggedIn:
-            print('Please log in')
-            return
-        if i:
-            if (isfolder is None):  # get info
-                return i
-            else:  # test on is folder or file
-                return (i['kind'] == 'folder') == isfolder
-
     def do_EOF(self, args):
         """"""
         print()
@@ -106,45 +101,64 @@ class Terminal(cmd.Cmd):
         """Quit"""
         return True
 
-    def do_login(self, args):
-        """Log in to server.\nUsage: login [username password]\nsusername and password can be stored in ~/.config/marcfs/config.json"""
-        # TODO: handle args
-        l, p = load_account()
-        self.__mrc.login(l, p)
-
-    def do_df(self, args):
-        """Display free disk space"""
-        rsp = self.__mrc.df()
-        print('{:,} / {:,} bytes used'.format(rsp['bytes_used'], rsp['bytes_total']).replace(',', ' '))
-
-    def do_info(self, args):
-        """Print entry info.\nUsage: info [folder/file]\nDefault - current folder"""
-        # print(f'Args = "{args}": {type(args)}')
-        path = self.__norm_path(args or '.')  # current path default
-        # print(f'New path: {path}')
-        # pprint.pprint(self.__mrc.info())
-        i = self.__get_info(path)
-        if i:
-            for k, v in i.items():
-                print(f'{k}: {v}')
-        else:
-            warnings.warn("Empty body")
-
     def do_pwd(self, args):
         """Print current remote path (ftp PWD)"""
         print(self.__cpath)
 
+    def do_login(self, args):
+        """Log in to server.\nUsage: login [username password]\nsusername and password can be stored in ~/.config/marcfs/config.json"""
+        # TODO: handle args
+        l, p = _load_account()
+        self.__mrc.login(l, p)
+
+    def __wrap(self, r):
+        """
+        Wrap response.
+        :param r - Response object
+        TODO: exception handling
+        """
+        if r:
+            return r.json()['body']
+        else:
+            _dprint("Error {} ({}): {}".format(r.status_code, r.reason, r.json()['body']))
+
+    def __get_info(self, path: str, isfolder: bool = None):
+        """
+        Get/test entry info.
+        :param path: entry to get/test
+        :param isfolder: None - get info, True - folder, False - file
+        :return: dict (entry info) or bool (is folder/file)
+        """
+        i = self.__wrap(self.__mrc.entry_info(path))
+        if i:
+            if (isfolder is None):  # get info
+                return i
+            else:                   # test on is folder or file
+                return (i['kind'] == 'folder') == isfolder
+
+    def do_info(self, args):
+        """Print entry info.\nUsage: info [folder/file]\nDefault - current folder"""
+        path = self.__norm_path(args or '.')  # current path default
+        i = self.__get_info(path)
+        if i:
+            for k, v in i.items():
+                print(f'{k}: {v}')
+
     def do_cd(self, args):
         """Change current folder (ftp C[W]D)\nUsage: cd [folder] (default /)"""
         path = self.__norm_path(args or '/')
-        if not self.__get_info(path, True):
-            print(f'`{path}` is not folder')
-            return
-        self.__cpath = path
-        self.__update_prompt()
+        r = self.__get_info(path, True)
+        if r:
+            self.__cpath = path
+            self.__update_prompt()
+        elif r is False:
+            _dprint(f'`{path}` is not folder')
 
     def do_ls(self, args):
         """List folder (ftp LIST)\nUsage: ls [-l] [folder]"""
+        # Common(17): size(13), published+access(1), >message(1)
+        # Folder(23): rev(5), grev(5), dirs(3), files(3), sharing+mount access(1), tree(1)
+        # Files(19): mtime(17), virus(1)
         # FIXME: message, weblink, weblink_access_rights for folders
         # FIXME: rights = R[ead](+W[загрузка] - folders only)
         # TODO: list template
@@ -154,10 +168,11 @@ class Terminal(cmd.Cmd):
             __long = True
             args = args[2:].lstrip()
         path = self.__norm_path(args or '.')
-        if not self.__get_info(path, True):
-            print(f'"{path}" is not folder')
-            return
-        i = self.__mrc.folder_read(path)
+        # TODO: check logged in
+        #if not self.__get_info(path, True):
+        #    _dprint(f'"{path}" is not folder')
+        #    return
+        i = self.__wrap(self.__mrc.folder_list(path))
         if i:
             if __long:
                 __tree = i['tree']
@@ -168,11 +183,12 @@ class Terminal(cmd.Cmd):
                 print('{:<13} {:<5} {:<5} dirs  files T Name'.format(
                     'Size', 'rev', 'grev'
                 ))
-                print('{:<13} {:<17} V M A W Name'.format('Size', 'mtime'))
+                print('{:<13} {:<17} V M A W Name'.format('', 'mtime'))
                 print(line)
                 # 2. body
                 for f in i['list']:
-                    if f['kind'] == 'folder':
+                    #print(f)
+                    if f['type'] == 'folder':
                         print('{:13d} {:5d} {:5d} {:5d} {:5d} {} {}/'.format(
                             f['size'], f['rev'], f['grev'], f['count']['folders'], f['count']['files'],
                             ' ' if f['tree'] == __tree else '!', f['name']
@@ -192,32 +208,24 @@ class Terminal(cmd.Cmd):
                 for f in i['list']:
                     print('{}{}'.format(f['name'], '/' if f['type'] == 'folder' else ''))
 
-    def do_md(self, args):
-        """Make folder (ftp MKD[IR])"""
-        # TODO: exceptions of print>return
-        if not args:  # 1. args is empty
-            # raise EmptyArgs
-            print('Folder name is empty')
+    def do_mkdir(self, path):
+        """Create new folder (ftp MKD[IR])\nUSage:
+        mkdir <path>"""
+        # TODO: rename mode
+        if not path:                            # 1. args is empty
+            _dprint('Empty path')
             return
-        if args in set(('.', '..', '/')):  # 2. special name
-            # raise InvalidName
-            print("Folder name cannot be `.` or `..` or `/`")
+        if path in set(('.', '..', '/')):       # 2. special name
+            _dprint("Folder name cannot be `.` or `..` or `/`")
             return
-        if INVALID_FOLDER_MASK.search(args):  # 3. invalid chars
-            # raise InvalidName
-            print("Folder name cannot contents `{}`".format(INVALID_FOLDER_CHARS))
+        if INVALID_FOLDER_MASK.search(path):    # 3. invalid chars
+            _dprint("Folder name cannot contents `{}`".format(INVALID_FOLDER_CHARS))
             return
-        path = self.__norm_path(args.rstrip('/'))
-        if self.__mrc.exists(path):  # 4. path exists
-            print(f"`{path}` already exists")
+        path = self.__norm_path(path.rstrip('/'))
+        if self.__mrc.exists(path) == 200:      # 4. path exists
+            _dprint(f"`{path}` already exists")
             return
-        parent = os.path.dirname(path)  # 5. parent not exists
-        if not self.__mrc.exists(parent):
-            print(f"Parent `{parent}` not exists")
-            # return
-        rsp = self.__mrc.folder_add(path, 'rewrite')
-        print('Status: {}, Body:'.format(rsp.status_code))
-        print(rsp.content)
+        self.__wrap(self.__mrc.folder_add(path))
 
     def _do_rd(self, args):
         """Delete folder (ftp RMD[IR])"""
@@ -251,22 +259,10 @@ class Terminal(cmd.Cmd):
         """Multiple put (ftp MPUT)"""
         self.__not_implemented()
 
-    def do_lpwd(self, args):
-        """Print current local folder"""
-        print(os.getcwd())
-
-    def do_lls(self, args):
-        """List [current] local folder"""
-        for i in os.listdir():
-            print(i)
-
-    def do_lcd(self, args):
-        """Change current local folder"""
-        npath = os.path.abspath(args[0])
-        if (os.path.isdir(npath)):
-            os.chdir(npath)
-        else:
-            print('Folder `%s` does not exists' % npath)
+    def do_df(self, args):
+        """Display free disk space"""
+        rsp = self.__wrap(self.__mrc.user_space())
+        print('{:,} / {:,} bytes used'.format(rsp['bytes_used'], rsp['bytes_total']).replace(',', ' '))
 
     def do_cmd(self, arg):
         """
@@ -295,13 +291,30 @@ class Terminal(cmd.Cmd):
         else:
             res = self.__mrc.any(args[0], args[1], payload)
             print(f'Code: {res.status_code}')
-            #if res.content:
-            #json.dumps(res.json(), indent=1)
+            # if res.content:
+            # json.dumps(res.json(), indent=1)
             pprint.pprint(res.json()['body'])
 
     def do_test(self, args):
         """Just for tests"""
         self.__mrc._test_exists(args)
+
+    def do_lpwd(self, args):
+        """Print current local folder"""
+        print(os.getcwd())
+
+    def do_lls(self, args):
+        """List [current] local folder"""
+        for i in os.listdir():
+            print(i)
+
+    def do_lcd(self, args):
+        """Change current local folder"""
+        npath = os.path.abspath(args[0])
+        if (os.path.isdir(npath)):
+            os.chdir(npath)
+        else:
+            print('Folder `%s` does not exists' % npath)
 
 
 def main():

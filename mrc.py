@@ -12,7 +12,7 @@ GOOD_RESPONSE = set((200, 201, 302))  # OK, Created, Found (temporary moved)
 start = None
 
 
-def getcsec() -> int:
+def _getcsec() -> int:
     """
     Get current seconds
     :return: current unixtime in seconds
@@ -20,7 +20,7 @@ def getcsec() -> int:
     return int(time.time())
 
 
-def dprint(s: str, end: str = '\n') -> None:
+def _dprint(s: str, end: str = '\n') -> None:
     """
     Prints debug info
     :param s: to print
@@ -54,16 +54,16 @@ class MailRuCloudClient:
         Print response details
         :param response:
         """
-        dprint('= Response: =')
-        dprint(f'Code: {response.status_code}')
-        dprint('-- Cookies: --')
+        _dprint('= Response: =')
+        _dprint(f'Code: {response.status_code}')
+        _dprint('-- Cookies: --')
         # if (self.__session.cookies.multiple_domains()):
         for d in self.__session.cookies.list_domains():
             print('Domain: {}, cookies: {}'.format(d, self.__session.cookies.get_dict(domain=d)))
         # else:
         # for k, v in self.__session.cookies.iteritems():
         #    dprint(f'{k}: {v}')
-        dprint('= /Response =')
+        _dprint('= /Response =')
         # print("Final url:", response.url)
 
     def __performAction(self, url: str, data=None):
@@ -93,7 +93,7 @@ class MailRuCloudClient:
         :return: True if ok
         :rtype: bool
         """
-        dprint("Auth...", end='')
+        _dprint("Auth...", end='')
         response = self.__session.post(
             url=AUTH_ENDPOINT,  # https://auth.mail.ru/cgi-bin/auth
             data={
@@ -105,7 +105,7 @@ class MailRuCloudClient:
         # self.__debug_response(response)
         if ((response) and (self.__session.cookies) and (self.__session.cookies.multiple_domains())):
             return True
-        dprint("Failed to auth {}".format(self.__login))
+        _dprint("Failed to auth {}".format(self.__login))
         return False
 
     def __obtainCloudCookie(self):
@@ -113,12 +113,12 @@ class MailRuCloudClient:
         Get Cloud cookie for authorized user (6 sec).
         :return: True if ok
         """
-        dprint("Cookie...", end='')
+        _dprint("Cookie...", end='')
         # TODO: check cookies on .auth.mail.ru entries B4
         response = self.__session.get(url=SCLD_COOKIE_ENDPOINT, params={'from': CLOUD_DOMAIN})
         if ((response) and (self.__session.cookies) and (self.__session.cookies.get('sdcs', domain='.cloud.mail.ru'))):
             return True
-        dprint('Seems you are not logged in')
+        _dprint('Seems you are not logged in')
         return False
 
     def __obtainAuthToken(self):
@@ -127,22 +127,22 @@ class MailRuCloudClient:
         TODO: check result
         :return:
         """
-        dprint("Token...", end='')
+        _dprint("Token...", end='')
         response = self.__session.get(url=SCLD_TOKEN_ENDPOINT)
         # self.__debug_response(response)
         if (response):
             try:
                 js = response.json()    # json.loads(response.content.decode("utf-8"))
             except:
-                dprint('Response is not json')
+                _dprint('Response is not json')
                 return False
             if ('body' in js) and ('token' in js['body']):
                 self.__token = js['body']['token']
                 #dprint(self.__token)
                 return True
-            dprint('Not `body` or `token` keys: {}'.format(js))
+            _dprint('Not `body` or `token` keys: {}'.format(js))
         else:
-            dprint('Bad response: {}'.format(response.status_code))
+            _dprint('Bad response: {}'.format(response.status_code))
         return False
 
     def __get_download_source(self):
@@ -150,15 +150,15 @@ class MailRuCloudClient:
         Fill out download and upload direct endpoints
         :return:
         """
-        dprint("URLs...", end='')
+        _dprint("URLs...", end='')
         response = self.__session.get(url=SCLD_SHARD_ENDPOINT, params={"token": self.__token})
         if (response):
             url = response.json()['body']
             self.__dURL = url['get'][0]['url']
             self.__uURL = url['upload'][0]['url']
-            dprint('OK')
+            _dprint('OK')
             return True
-        dprint('oops')
+        _dprint('oops')
         return False
 
     def login(self, l, p):
@@ -187,116 +187,68 @@ class MailRuCloudClient:
         :param path: entry to test
         :return: exists
         """
-        return self.__session.head(
+        r = self.__session.head(
             url=SCLD_FILE_ENDPOINT,
             params={
                 "home": path,
                 "token": self.__token,
             }
-        ).status_code == 200
+        )
+        return r.status_code
 
     def __do_get(self, endpoint: str, payload: dict = {}) -> object:
         """
         Do get request. Handle token[, 404]
         :param endpoint: path after CLOUD_DOMAIN
         :param params: payload
-        :return: response body or None
+        :return: response
         :exception: requests.exceptions.ReadTimeout
         """
-        # TODO: handle 400, 403, 404
-        # TODO: retry token
-        if not self.__token:    # FIXME: raise NotAuth
-            return
-        response = self.__session.get(
+        #if not self.__token:    # FIXME: raise NotAuth
+        #    return
+        h = {"token": self.__token} if self.__token else {}
+        return self.__session.get(
             url=endpoint,
-            params={**{
-                "token": self.__token,
-            }, **payload},
+            params={**h, **payload},
         )
-        if response:    # 200
-            return response
-        print(f"Status: {response.status_code}")
 
     def __do_post(self, endpoint: str, payload: dict = {}) -> object:
         """
         Do get request. Handle token[, 404]
         :param endpoint: path after CLOUD_DOMAIN
         :param params: payload
-        :return: response body or None
+        :return: response
         """
-        # TODO: handle 400, 403, 404
-        # TODO: retry token
-        if not self.__token:    # FIXME: raise NotAuth
-            return
-        response = self.__session.post(
+        h = {"token": self.__token} if self.__token else {}
+        return self.__session.post(
             url=endpoint,
-            data={**{
-                "token": self.__token,
-            }, **payload},
+            data={**h, **payload},
         )
-        #if response:    # 200
-        return response
-        #print(f"Status: {response.status_code}")
 
-    def df(self) -> dict:
-        """Space used"""
-        if not self.__token:
-            raise MailRuCloudError.NotLoggedIn()  # get out
-        print("Go further")
-        return self.__do_get(SCLD_SPACE_ENDPOINT).json()['body']
-
-    def info(self, path: str) -> dict:
+    def entry_info(self, path: str) -> dict:
         """
         Check entry. Do get file?home=path.
         TODO: cache folder content
         :param path:
-        :return: response body or None
+        :return: Response
         """
-        self.__chk_token()  # get out
+        #self.__chk_token()  # get out
         return self.__do_get(
             SCLD_FILE_ENDPOINT,
             {'home': path}
-        ).json()['body'] # strip email,status[200],time
-
-    def folder_add(self, path:str, resolve:str = 'rewrite'):
-        """
-        Create new folder.
-        Return body: {"email":<login>>,"body":<path>>,"time":<timestamp>,"status":200}
-        :param path: full path of folder to create
-        :param resolve: How to solve conflict - rewrite|rename|strict (ignore (replace)/new name/reject?)
-        :return:
-        """
-        return self.__do_post(
-            SCLD_FOLDERADD_ENDPOINT,
-            {
-                'home': path,
-                'conflict': resolve,
-            }
         )
 
-    def folder_read(self, path):
-        """
-        Get folder content.
-        TODO: get cached
-        :param path:
-        :return: folder/403/404/is file
-        """
-        return self.__do_get(
-            SCLD_FOLDER_ENDPOINT,
-            {'home': path}  # skipped: limit, offset, sort_order, sort_type
-        ).json()['body']
-
-    def _folder_rename(self, path, new_name):
+    def _entry_copy(self, path, new_folder):
         """
         ???
-        Rename folder inplace
+        Copy entry into new place.
         :param path:
-        :param new_name:
+        :param new_folder:
         :return:
         """
         pass
 
-    def _folder_move(self, path, new_folder):
+    def _entry_move(self, path, new_folder):
         """
         ???
         Move folder into new place.
@@ -306,7 +258,17 @@ class MailRuCloudClient:
         """
         pass
 
-    def _folder_del(self, path):
+    def _entry_rename(self, path, new_name):
+        """
+        ???
+        Rename folder inplace
+        :param path:
+        :param new_name:
+        :return:
+        """
+        pass
+
+    def _entry_remove(self, path):
         """
         Delete folder
         :param path: folder to del
@@ -332,33 +294,39 @@ class MailRuCloudClient:
         :return: Ok/403/404
         """
 
-    def _file_rename(self, path, new_name, resolve):
+    def folder_add(self, path:str, resolve:str = None):
         """
-        Rename file inplace
-        :param path:
-        :param new_name:
-        :param resolve How to solve conflict - ignore (replace)/new name/reject
+        Create new folder.
+        Return body: {"email":<login>>,"body":<path>>,"time":<timestamp>,"status":200}
+        :param path: full path of folder to create
+        :param resolve: How to solve conflict - rewrite|rename|strict (ignore (replace)/new name/reject?)
         :return:
         """
-        pass
+        h = {
+            'home': path
+        }
+        if resolve:
+            h['conflict'] = resolve
+        return self.__do_post(SCLD_FOLDERADD_ENDPOINT, h)
 
-    def _file_move(self, path, new_path, resolve):
+    def folder_list(self, path):
         """
-        Move file into new place
+        Get folder content.
+        TODO: get cached
         :param path:
-        :param new_path:
-        :param resolve How to solve conflict - ignore (replace)/new name/reject
-        :return:
+        :return: folder/403/404/is file
         """
-        pass
+        return self.__do_get(
+            SCLD_FOLDER_ENDPOINT,
+            {'home': path}
+        )
 
-    def _file_del(self, path):
-        """
-        Delete file
-        :param path:
-        :return: ok/403/404
-        """
-        pass
+    def user_space(self) -> dict:
+        """Space used"""
+        if not self.__token:
+            raise MailRuCloudError.NotLoggedIn()  # get out
+        print("Go further")
+        return self.__do_get(SCLD_SPACE_ENDPOINT)
 
     def any(self, method:str, url:str, payload:dict):
         """
@@ -389,7 +357,7 @@ class MailRuCloudClient:
                 data={**{"token": self.__token}, **payload},
             )
         else:
-            dprint(f"Unknown method `{method}`")
+            _dprint(f"Unknown method `{method}`")
             return
         return response
 
@@ -400,7 +368,7 @@ class MailRuCloudClient:
         """
         for e in ('file', 'folder'):  # endpoint
             for h in ('/1', '1/2.txt'):  # ?home=
-                dprint('{} {}:'.format(e, h))
+                _dprint('{} {}:'.format(e, h))
                 response: Response = self.__session.get(
                     url=CLOUD_DOMAIN + '/api/v2/' + e,
                     params={

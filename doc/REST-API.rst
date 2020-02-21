@@ -21,172 +21,84 @@ Requests
 Overview
 ~~~~~~~~
 
-.. list-table:: All API (sorted by endpoint)
-   :widths: 1 10 1 30
-   :header-rows: 1
-
-   * - №
-     - Endpoint
-     - M
-     - Description
-   * - 1
-     - /dispatcher
-     - G
-     - Get download/upload URLs
-   * - 2
-     - /file
-     - G
-     - Get entry info
-   * - 3
-     - /file/add
-     - P
-     - Upload file
-   * - 4
-     - /file/copy
-     - P
-     - Copy entry 2 folder
-   * - 5
-     - /file/history
-     - G
-     - Get file history
-   * - 6
-     - /file/move
-     - P
-     - Move entry to folder
-   * - 7
-     - /file/publish
-     - P
-     - Publish entry
-   * - 8
-     - /file/remove
-     - P
-     - Delete entry (2 Trash)
-   * - 9
-     - /file/rename
-     - P
-     - Rename entry inplace
-   * - 10
-     - /file/unpublish
-     - P
-     - Unpublish entry
-   * - 11
-     - /folder
-     - G
-     - Get folder content
-   * - 12
-     - /folder/add
-     - P
-     - Create folder
-   * - 13
-     - /folder/invites
-     - G
-     - List incoming invites
-   * - 14
-     - /folder/invites/info
-     - G
-     - Info about invite
-   * - 15
-     - /folder/invites/reject
-     - P
-     - Reject ivitate
-   * - 16
-     - /folder/mount
-     - P
-     - Подключить' invite
-   * - 17
-     - /folder/share
-     - P
-     - [Re]share folder to other (invite)
-   * - 18
-     - /folder/shared
-     - G
-     - 403: user
-   * - 19
-     - /folder/shared/incoming
-     - G
-     - List incoming invites
-   * - 20
-     - /folder/shared/info
-     - G
-     - Get published entry info
-   * - 21
-     - /folder/shared/links
-     - G
-     - List ...
-   * - 22
-     - /folder/tree
-     - G
-     - `folder` of /..<target>
-   * - 23
-     - /folder/unmount
-     - P
-     - Отключить foreign share
-   * - 24
-     - /folder/unshare
-     - P
-     - Remove share x user
-   * - 25
-     - /tokens/csrf
-     - P
-     - Get session token
-   * - 26
-     - /tokens/download
-     - P
-     - Get ? token
-   * - 27
-     - /trashbin
-     - G
-     - Get Trash content
-   * - 28
-     - /trashbin/empty
-     - P
-     - Clean Trash
-   * - 29
-     - /trashbin/restore
-     - P
-     - Restore file from Trash
-   * - 30
-     - /user
-     - G
-     - Get all user info
-   * - 31
-     - /user/edit
-     - P
-     - Update user UI
-   * - 32
-     - /user/space
-     - G
-     - Usage (used, total)
-   * - 33
-     - /weblinks
-     - G
-     - Get weblink info
-   * - 34
-     - /weblinks/readonly
-     - P
-     - Set published RO
-   * - 35
-     - /weblinks/writable
-     - P
-     - Set published RW
-   * - 36
-     - /zip
-     - P
-     - Download as zip
 
 Terms
 `````
 
 :Path:
-    Full entry path, e.g. /dir1/dir2/file3
+    Full entry path (e.g. `/dir1/dir2/file3.txt`)
+:Name:
+    Entry name (e.g. `file3.txt`)
 :WebLink:
-    %4w/%9w (e.g. EDAS/ZegcnyJrJ)
+    %4w/%9w after https://cloud.mail.ru/public/ (e.g. `EDAS/ZegcnyJrJ`)
 :Token:
-    %32w (e.g. ...) - 24-byte B64 ?
+    %32w (e.g. `...`) - 24-byte B64 ?
 :Tree:
-    %24d (e.g. ...) - 18-byte B64 ?
+    %24d (e.g. `643031373030323930303030`) - 18-byte B64 ?
 :Hash:
-    %40X (e.g. ...) - 20-byte
+    %40X (e.g. `...`) - 20-byte
+:Conflict:
+    - rename - target stay `path (1)` if target path occupied
+    - rewrite -
+    - strict -
+
+Entry info
+``````````
+
+:kind:
+    `file`|`folder`
+:type:
+    `file`|`folder`|`shared`
+:home:
+    <Path>
+:name:
+    str
+:tree:
+    <Tree>
+:[weblink]:
+    <Weblink> - for published
+:[weblink_access_rights]:
+    `r`|`rw` - for published (files - r only)
+:[message]:
+    `` - for published
+
+File info
+`````````
+
+:kind:
+    `file`
+:type:
+    `file`
+:mtime:
+    int - unixtime
+:size:
+    int
+:hash:
+    *Hash*
+:virus_scan:
+    `pass`|`fail`|`in_progress`
+
+Folder info (short)
+```````````````````
+
+:kind:
+    `folder`
+:type:
+    - `folder` - simply folder
+    - `shared` - my shared folder
+    - `mounted` - foreign shared; cannot be shared; published inside rights (can't publish as rw for ro mounts)
+:count:
+    {'folders': 0, 'files': 0}
+:rev:
+    int
+:grev:
+    int
+:[size]:
+    int - in list[] only
+:[rrev]:
+    int - for mounted only
+:[readonly]:
+    `true`, for RO mounted only
 
 Common
 ~~~~~~
@@ -200,6 +112,10 @@ Common
 :Response:
     :email:
         ...
+    :status:
+        ...
+    :time:
+        ...
     :body:
         ...
 :Error Codes:
@@ -207,8 +123,10 @@ Common
         OK
     :400:
         Bad Request (e.g. required params absent)
+    :401 ?:
+        Unauthorized
     :403:
-        Forbidden (no token?)
+        Forbidden (not logged in)
     :404:
         Not Found (e.g. object really not exists)
     :406:
@@ -217,7 +135,7 @@ Common
 Entry (5)
 ~~~~~~~~~
 
-Info
++Info
 ````
 
 :Resource: /file
@@ -226,6 +144,8 @@ Info
 :Parameters:
     :home: *Path*
 :Response:
+:Error Codes:
+    :404: Entry not exists
 
 Copy
 ````
@@ -236,8 +156,13 @@ Copy
 :Parameters:
     :home: *Path* - entry to copy
     :folder: *Path* - folder copy to
-    :conflict: `rename|rewrite|strict` (usual rename)
+    :conflict: `rename|rewrite|strict`
 :Response: new path
+:Error Codes:
+    :404: Src Entry not exists
+    :...: dst folder not exists
+    :...: dst is file
+    :...: new name is path
 
 Move
 ````
@@ -250,6 +175,11 @@ Move
     :folder: *Path* - Folder move to
     :conflict: `rename|rewrite|strict` (usual rename)
 :Response:
+:Error Codes:
+    :404: Src Entry not exists
+    :...: dst folder not exists
+    :...: dst is file
+    :...: new name is path
 
 Rename
 ``````
@@ -262,6 +192,10 @@ Rename
     :name: *Name* - new name
     :conflict: `rename|rewrite|strict` (usual rename)
 :Response: new path
+:Error Codes:
+    :404: Src Entry not exists
+    :...: dst exists
+    :...: dst is file against src is folder
 
 Remove
 ``````
@@ -274,11 +208,14 @@ Remove
     :hash?: ...
     :~~conflict~~: ...
 :Response: path
+:Error Codes:
+    :404: Src Entry not exists
+    :...: dst exists
 
 File
 ~~~~
 
-Upload File
+File Upload
 ```````````
 
 :Resource: /file/add
@@ -300,7 +237,7 @@ File History
 Folder
 ~~~~~~
 
-List Folder
+...Folder List
 ```````````
 
 :Resource: /folder
@@ -325,21 +262,23 @@ Folder Tree
     :home: *Path*
 :Response: list of `List Folder`s
 
-Create Folder
-`````````````
++Folder New
+``````````
 
 :Resource: /folder/add
 :Method: POST
 :Description: Create new folder
 :Parameters:
     :home: *Path*
-    :conflict: `rename|rewrite|strict` (usual rename)
+    :[conflict]: `rename|rewrite|strict`
 :Response:
+    :200: str - new folder path
+    :400: json if *not* `rename` (e.g. {'home': {'error': 'exists', 'value': 'Path'}})
 
 Trashbin
 ~~~~~~~~
 
-List Trashbin
+Trashbin List
 `````````````
 
 :Resource: /trashbin
@@ -348,7 +287,7 @@ List Trashbin
 :Parameters:
 :Response:
 
-Empty Trashbin
+Trashbin Empty
 ``````````````
 
 :Resource: /trashbin/empty
@@ -357,7 +296,7 @@ Empty Trashbin
 :Parameters:
 :Response:
 
-Restore File
+File Restore
 ````````````
 
 :Resource: /trashbin/empty
