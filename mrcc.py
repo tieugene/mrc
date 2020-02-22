@@ -19,6 +19,10 @@ from oops import MailRuCloudError
 
 INVALID_FOLDER_CHARS = "\"*:<>?\\|"
 INVALID_FOLDER_MASK = re.compile('["*:<>?\\\|]')
+WEBLINK_ACCESS = {
+    'r': 'R',
+    'rw': 'W'
+}
 VIRUS_TEST = {
     'pass': '+',
     'fail': 'x',
@@ -155,9 +159,14 @@ class Terminal(cmd.Cmd):
             _dprint(f'`{path}` is not folder')
 
     def do_ls(self, args):
-        """List folder (ftp LIST)\nUsage: ls [-l] [folder]"""
+        """List folder (ftp LIST)\nUsage: ls [-l] [folder]\nOutput:
+        - P (published): W - rw (folder only), R - r/o[, ! - weblink w/o weblink_access-right or vice versa]
+        - M (message): * - exists and not empty
+        - S (share; folder only): S - shared, M - mounted rw, m - mounted r/o
+        - T(folder)/V(file): ! - tree is not equal to parent, +/x/? - virus_scan=pass/fail/not_yet
+        """
         # Common(17): size(13), ... published+access(1), >message(1)
-        # Folder(23): rev(5), grev(5), dirs(3), files(3), sharing+mount access(1), tree(1)
+        # Folder(27): rev(5), grev(5), dirs(5), files(5), sharing+mount access(1), tree(1)
         # Files(21): mtime(19), virus(1)
         # TODO: check isfile
         # TODO: check logged in
@@ -175,33 +184,40 @@ class Terminal(cmd.Cmd):
         if i:
             if __long:
                 __tree = i['tree']
-                line = 40 * '-'
+                line = 42 * '-'
                 # 1. head
                 print('{} (rev {}, grev {}):'.format(i['home'], i['rev'], i['grev']))
                 print(line)
-                print('{:<13} {:<5} {:<5} dirs  files T Name'.format(
-                    'Size', 'rev', 'grev'
-                ))
-                print('{:<13} {:<17} V M A W Name'.format('', 'mtime'))
+                print('PMST dirs files rev   grev  {:13} Name'.format('Size'))
+                print('   V date       time')
                 print(line)
                 # 2. body
                 for f in i['list']:
                     #print(f)
+                    flags = [' ', ' ', ' ', ' ']
+                    if 'weblink' in f:
+                        flags[0] = WEBLINK_ACCESS[f['weblink_access_rights']]
+                        if f['message']:
+                            flag[1] = '*'
                     if f['type'] == 'folder':
-                        print('{:13d} {:5d} {:5d} {:5d} {:5d} {} {}/'.format(
-                            f['size'], f['rev'], f['grev'], f['count']['folders'], f['count']['files'],
-                            ' ' if f['tree'] == __tree else '!', f['name']
+                        if f['kind'] == 'shared':
+                            flags[2] = 'S'
+                        elif f['kind'] == 'mounted':
+                            flags[2] = 'm' if 'readonly' in f else 'M'
+                        if f['tree'] != __tree:
+                            flags[3] = '!'
+                        print('{:4} {:4d} {:5d} {:5d} {:5d} {:13d} {}/'.format(
+                            ''.join(flags), f['count']['folders'], f['count']['files'], f['rev'], f['grev'], f['size'], f['name']
                         ))
-                    else:  # skip hash; +5 spaces; virus: pass, fail, not_yet
-                        vir = f['virus_scan']
-                        print('{:13d} {:17} {} {:1} {:1} {:1} {}'.format(
-                            f['size'], datetime.datetime.fromtimestamp(f['mtime']).strftime('%Y.%m.%d %H:%M:%S'),
-                            VIRUS_TEST.get(vir, vir), f.get('message', '-'), f.get('weblink_access_rights', '-'),
-                            '+' if 'weblink' in f else '-', f['name']
+                    else:   # file
+                        flags[3] = VIRUS_TEST[f['virus_scan']]
+                        print('{:4} {:22} {:13d} {}'.format(
+                            ''.join(flags), datetime.datetime.fromtimestamp(f['mtime']).strftime('%Y.%m.%d    %H:%M:%S'),
+                            f['size'], f['name']
                         ))
                 # 3. bottom
-                print('{}\n{:13d} {:17d} {:5d}'.format(
-                    line, i['size'], i['count']['folders'], i['count']['files']
+                print('{}\n     {:4d} {:5d} {:25d}'.format(
+                    line, i['count']['folders'], i['count']['files'], i['size']
                 ))
             else:
                 for f in i['list']:

@@ -48,7 +48,7 @@ Entry info
 :kind:
     `file`|`folder`
 :type:
-    `file`|`folder`|`shared`
+    `file`|`folder`|`shared`|`mounted`
 :home:
     <Path>
 :name:
@@ -76,7 +76,7 @@ File info
 :hash:
     *Hash*
 :virus_scan:
-    `pass`|`fail`|`in_progress`
+    `pass`|`fail`|`not_yet`
 
 Folder info (short)
 ```````````````````
@@ -96,7 +96,7 @@ Folder info (short)
 :[rrev]:
     int - for mounted only
 :[readonly]:
-    `true`, for RO mounted only
+    `True`, for RO mounted only
 :[size]:
     int - in /folder request only
 :[list]:
