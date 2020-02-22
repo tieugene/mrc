@@ -261,7 +261,7 @@ class Terminal(cmd.Cmd):
         self.__not_implemented()
 
     def do_cp(self, arg):
-        """Copy folder or file into folder\nUsage:
+        """Copy folder/file into folder\nUsage:
         cp <src> <folder>"""
         # TODO: check arg
         # TODO: check folder on invalid chars
@@ -271,9 +271,16 @@ class Terminal(cmd.Cmd):
         if (rsp):
             print(rsp)
 
-    def _do_mv(self, args):
-        """Rename/move file/folder (ftp ?)"""
-        self.__not_implemented()
+    def do_mv(self, arg):
+        """Move folder/file into folder\nUsage:
+        mv <src> <folder>"""
+        # TODO: check arg
+        # TODO: check folder on invalid chars
+        # TODO: rename mode
+        args = arg.split(' ', 2)
+        rsp = self.__wrap(self.__mrc.entry_move(args[0], args[1]))
+        if (rsp):
+            print(rsp)
 
     def _do_mget(self, args):
         """Multiple get (ftp MGET)"""

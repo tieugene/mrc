@@ -230,9 +230,9 @@ class MailRuCloudClient:
 
     def entry_copy(self, path:str, folder:str, resolve:str = None) -> Response:
         """
-        Copy entry into new place.
-        :param path:
-        :param new_folder:
+        Copy entry into folder.
+        :param path: entry to copy
+        :param folder: folder copy to
         :return: Response
         """
         h = {'home': path, 'folder': folder}
@@ -240,15 +240,17 @@ class MailRuCloudClient:
             h['conflict'] = resolve
         return self.__do_post(SCLD_FILECOPY_ENDPOINT, h)
 
-    def _entry_move(self, path, new_folder):
+    def entry_move(self, path:str, folder:str, resolve:str = None) -> Response:
         """
-        ???
-        Move folder into new place.
-        :param path:
-        :param new_folder:
-        :return:
+        Move entry into folder.
+        :param path: entry to move
+        :param folder: folder move to
+        :return: Response
         """
-        pass
+        h = {'home': path, 'folder': folder}
+        if resolve:
+            h['conflict'] = resolve
+        return self.__do_post(SCLD_FILEMOVE_ENDPOINT, h)
 
     def _entry_rename(self, path, new_name):
         """

@@ -149,7 +149,7 @@ Entry (5)
 :Error Codes:
     :404: Entry not exists
 
-Copy
++Copy
 ````
 
 Creates parents if not exist
@@ -163,11 +163,11 @@ Creates parents if not exist
     :[conflict]: `rename|rewrite|strict`
 :Response: new path
 :Error Codes:
-    :400: dst exists w/o conflict=rename; dst is not folder
-    :404: Src Entry not exists
-    :507: cp to r/o mounted
+    :400: target exists (w/o conflict=rename); dst is not folder
+    :404: src not exists
+    :507: dst is r/o mounted
 
-Move
++Move
 ````
 
 :Resource: /file/move
@@ -176,13 +176,12 @@ Move
 :Parameters:
     :home: *Path* - Entry to move
     :folder: *Path* - Folder move to
-    :conflict: `rename|rewrite|strict` (usual rename)
-:Response:
+    :conflict: `rename|rewrite|strict`
+:Response: new path
 :Error Codes:
-    :404: Src Entry not exists
-    :...: dst folder not exists
-    :...: dst is file
-    :...: new name is path
+    :400: target exists (w/o conflict=rename); dst is not folder
+    :404: src not exists
+    :507: dst is r/o mounted
 
 Rename
 ``````
