@@ -65,7 +65,7 @@ class Terminal(cmd.Cmd):
     https://stackoverflow.com/questions/9340391/python-interactive-shell-type-application
     """
     prompt = '> '
-    intro = 'Welcome to Cloud@Mail.Ru. Type help or ? to list commands.\n'
+    intro = 'Welcome to Cloud@Mail.Ru. Type `help` or `?` to list commands.\n'
     __cpath = None
     __mrc = None
 
@@ -101,7 +101,7 @@ class Terminal(cmd.Cmd):
         """Exit"""
         return True
 
-    def do_quit(args):
+    def do_quit(self, args):
         """Quit"""
         return True
 
@@ -256,10 +256,6 @@ class Terminal(cmd.Cmd):
         """Upload file (ftp PUT)"""
         self.__not_implemented()
 
-    def _do_rm(self, args):
-        """Delete file (ftp DELE[TE])"""
-        self.__not_implemented()
-
     def do_cp(self, arg):
         """Copy folder/file into folder\nUsage:
         cp <src> <folder>"""
@@ -267,7 +263,7 @@ class Terminal(cmd.Cmd):
         # TODO: check folder on invalid chars
         # TODO: rename mode
         args = arg.split(' ', 2)
-        rsp = self.__wrap(self.__mrc.entry_copy(args[0], args[1]))
+        rsp = self.__wrap(self.__mrc.entry_copy(self.__norm_path(args[0]), self.__norm_path(args[1])))
         if (rsp):
             print(rsp)
 
@@ -278,16 +274,25 @@ class Terminal(cmd.Cmd):
         # TODO: check folder on invalid chars
         # TODO: rename mode
         args = arg.split(' ', 2)
-        rsp = self.__wrap(self.__mrc.entry_move(args[0], args[1]))
+        rsp = self.__wrap(self.__mrc.entry_move(self.__norm_path(args[0]), self.__norm_path(args[1])))
         if (rsp):
             print(rsp)
 
-    def _do_mget(self, args):
-        """Multiple get (ftp MGET)"""
-        self.__not_implemented()
+    def do_rn(self, arg):
+        """Rename entry inplace\nUsage:
+        rn <path> <name>"""
+        """Move folder/file into folder\nUsage:
+        mv <src> <folder>"""
+        # TODO: check arg
+        # TODO: check new name on invalid chars
+        # TODO: rename mode
+        args = arg.split(' ', 2)
+        rsp = self.__wrap(self.__mrc.entry_rename(self.__norm_path(args[0]), args[1]))
+        if (rsp):
+            print(rsp)
 
-    def _do_mput(self, args):
-        """Multiple put (ftp MPUT)"""
+    def _do_rm(self, args):
+        """Delete file (ftp DELE[TE])"""
         self.__not_implemented()
 
     def do_df(self, args):
@@ -326,10 +331,6 @@ class Terminal(cmd.Cmd):
             # json.dumps(res.json(), indent=1)
             pprint.pprint(res.json()['body'])
 
-    def do_test(self, args):
-        """Just for tests"""
-        self.__mrc._test_exists(args)
-
     def do_lpwd(self, args):
         """Print current local folder"""
         print(os.getcwd())
@@ -347,6 +348,9 @@ class Terminal(cmd.Cmd):
         else:
             print('Folder `%s` does not exists' % npath)
 
+    def do_test(self, args):
+        """Just for tests"""
+        self.__mrc._test_exists(args)
 
 def main():
     t = Terminal(MailRuCloudClient()).cmdloop()

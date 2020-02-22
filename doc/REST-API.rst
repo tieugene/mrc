@@ -183,7 +183,7 @@ Creates parents if not exist
     :404: src not exists
     :507: dst is r/o mounted
 
-Rename
++Rename
 ``````
 
 :Resource: /file/rename
@@ -192,12 +192,12 @@ Rename
 :Parameters:
     :home: *Path* - Entry to rename
     :name: *Name* - new name
-    :conflict: `rename|rewrite|strict` (usual rename)
+    :[conflict]: `rename|rewrite|strict`
 :Response: new path
 :Error Codes:
-    :404: Src Entry not exists
-    :...: dst exists
-    :...: dst is file against src is folder
+    :400: name is occupied (w/o rename); name is path
+    :404: Src not exists
+    :507?: src folder is r/o mounted
 
 Remove
 ``````

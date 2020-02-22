@@ -252,15 +252,17 @@ class MailRuCloudClient:
             h['conflict'] = resolve
         return self.__do_post(SCLD_FILEMOVE_ENDPOINT, h)
 
-    def _entry_rename(self, path, new_name):
+    def entry_rename(self, path:str, name:str, resolve:str = None) -> Response:
         """
-        ???
-        Rename folder inplace
+        Rename entry inplace
         :param path:
-        :param new_name:
-        :return:
+        :param name: new name
+        :return: Response
         """
-        pass
+        h = {'home': path, 'name': name}
+        if resolve:
+            h['conflict'] = resolve
+        return self.__do_post(SCLD_FILERENAME_ENDPOINT, h)
 
     def _entry_remove(self, path):
         """
