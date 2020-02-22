@@ -93,12 +93,14 @@ Folder info (short)
     int
 :grev:
     int
-:[size]:
-    int - in list[] only
 :[rrev]:
     int - for mounted only
 :[readonly]:
     `true`, for RO mounted only
+:[size]:
+    int - in /folder request only
+:[list]:
+    [] - in /folder request only
 
 Common
 ~~~~~~
@@ -250,7 +252,7 @@ Folder
     :sort:
         :type: `name|mtime|size`
         :order: `asc|desc`
-:Response: list[]
+:Response: <Folder> + list[]
 
 Folder Tree
 ```````````

@@ -156,11 +156,11 @@ class Terminal(cmd.Cmd):
 
     def do_ls(self, args):
         """List folder (ftp LIST)\nUsage: ls [-l] [folder]"""
-        # Common(17): size(13), published+access(1), >message(1)
+        # Common(17): size(13), ... published+access(1), >message(1)
         # Folder(23): rev(5), grev(5), dirs(3), files(3), sharing+mount access(1), tree(1)
-        # Files(19): mtime(17), virus(1)
-        # FIXME: message, weblink, weblink_access_rights for folders
-        # FIXME: rights = R[ead](+W[загрузка] - folders only)
+        # Files(21): mtime(19), virus(1)
+        # TODO: check isfile
+        # TODO: check logged in
         # TODO: list template
         # TODO: cache
         __long = False
@@ -168,7 +168,6 @@ class Terminal(cmd.Cmd):
             __long = True
             args = args[2:].lstrip()
         path = self.__norm_path(args or '.')
-        # TODO: check logged in
         #if not self.__get_info(path, True):
         #    _dprint(f'"{path}" is not folder')
         #    return
@@ -196,7 +195,7 @@ class Terminal(cmd.Cmd):
                     else:  # skip hash; +5 spaces; virus: pass, fail, not_yet
                         vir = f['virus_scan']
                         print('{:13d} {:17} {} {:1} {:1} {:1} {}'.format(
-                            f['size'], datetime.datetime.fromtimestamp(f['mtime']).strftime('%y.%m.%d %H:%M:%S'),
+                            f['size'], datetime.datetime.fromtimestamp(f['mtime']).strftime('%Y.%m.%d %H:%M:%S'),
                             VIRUS_TEST.get(vir, vir), f.get('message', '-'), f.get('weblink_access_rights', '-'),
                             '+' if 'weblink' in f else '-', f['name']
                         ))
