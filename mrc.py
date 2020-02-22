@@ -264,13 +264,13 @@ class MailRuCloudClient:
             h['conflict'] = resolve
         return self.__do_post(SCLD_FILERENAME_ENDPOINT, h)
 
-    def _entry_remove(self, path):
+    def entry_remove(self, path:str) -> Response:
         """
-        Delete folder
-        :param path: folder to del
-        :return:
+        Remove entry into trashbin
+        :param path: entry to del
+        :return: Response
         """
-        pass
+        return self.__do_post(SCLD_FILEREMOVE_ENDPOINT, {'home': path})
 
     def _file_add(self, path, src_path, resolve):
         """

@@ -199,7 +199,7 @@ Creates parents if not exist
     :404: Src not exists
     :507?: src folder is r/o mounted
 
-Remove
++Remove
 ``````
 
 :Resource: /file/remove
@@ -207,12 +207,11 @@ Remove
 :Description: Remove Entry into *Trashbin*
 :Parameters:
     :home: *Path* - entry to remove
-    :hash?: ...
-    :~~conflict~~: ...
+    :[hash]: anything
 :Response: path
 :Error Codes:
-    :404: Src Entry not exists
-    :...: dst exists
+    :200: Everywhere
+    :507?:
 
 File
 ~~~~
@@ -538,8 +537,8 @@ Used space
 :Resource: /user/space
 :Method: GET
 :Description: Get used/available space
-:Parameters:
-:Response:
+:Parameters: None
+:Response: {"bytes_used":<int>,"bytes_total":<int>}
 
 Zip
 ```

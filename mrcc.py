@@ -291,9 +291,14 @@ class Terminal(cmd.Cmd):
         if (rsp):
             print(rsp)
 
-    def _do_rm(self, args):
-        """Delete file (ftp DELE[TE])"""
-        self.__not_implemented()
+    def do_rm(self, arg):
+        """Delete file (ftp DELE[TE])\nUsage:
+        rm <path>"""
+        # TODO: check arg
+        # TODO: check entry exists
+        rsp = self.__wrap(self.__mrc.entry_remove(self.__norm_path(arg)))
+        if (rsp):
+            print(rsp)
 
     def do_df(self, args):
         """Display free disk space"""
