@@ -181,20 +181,16 @@ class MailRuCloudClient:
         if not self.__token:
             raise MailRuCloudError.NotLoggedIn()
 
-    def exists(self, path:str) -> bool:
+    def exists(self, path:str) -> int:
         """
         Test entry exists (B4 creating)
         :param path: entry to test
-        :return: exists
+        :return: HTTP code
         """
-        r = self.__session.head(
-            url=SCLD_FILE_ENDPOINT,
-            params={
-                "home": path,
-                "token": self.__token,
-            }
-        )
-        return r.status_code
+        h = {"home": path}
+        if self.__token:
+            h["token"] = self.__token
+        return self.__session.head(url=SCLD_FILE_ENDPOINT, params=h).status_code
 
     def __do_get(self, endpoint: str, payload: dict = {}) -> object:
         """
@@ -207,10 +203,7 @@ class MailRuCloudClient:
         #if not self.__token:    # FIXME: raise NotAuth
         #    return
         h = {"token": self.__token} if self.__token else {}
-        return self.__session.get(
-            url=endpoint,
-            params={**h, **payload},
-        )
+        return self.__session.get(url=endpoint, params={**h, **payload})
 
     def __do_post(self, endpoint: str, payload: dict = {}) -> object:
         """
@@ -220,10 +213,7 @@ class MailRuCloudClient:
         :return: response
         """
         h = {"token": self.__token} if self.__token else {}
-        return self.__session.post(
-            url=endpoint,
-            data={**h, **payload},
-        )
+        return self.__session.post(url=endpoint, data={**h, **payload})
 
     def entry_info(self, path: str) -> dict:
         """
@@ -238,15 +228,17 @@ class MailRuCloudClient:
             {'home': path}
         )
 
-    def _entry_copy(self, path, new_folder):
+    def entry_copy(self, path:str, folder:str, resolve:str = None) -> Response:
         """
-        ???
         Copy entry into new place.
         :param path:
         :param new_folder:
-        :return:
+        :return: Response
         """
-        pass
+        h = {'home': path, 'folder': folder}
+        if resolve:
+            h['conflict'] = resolve
+        return self.__do_post(SCLD_FILECOPY_ENDPOINT, h)
 
     def _entry_move(self, path, new_folder):
         """
@@ -302,9 +294,7 @@ class MailRuCloudClient:
         :param resolve: How to solve conflict - rewrite|rename|strict (ignore (replace)/new name/reject?)
         :return:
         """
-        h = {
-            'home': path
-        }
+        h = {'home': path}
         if resolve:
             h['conflict'] = resolve
         return self.__do_post(SCLD_FOLDERADD_ENDPOINT, h)

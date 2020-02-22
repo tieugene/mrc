@@ -237,10 +237,12 @@ class Terminal(cmd.Cmd):
             _dprint("Folder name cannot contents `{}`".format(INVALID_FOLDER_CHARS))
             return
         path = self.__norm_path(path.rstrip('/'))
-        if self.__mrc.exists(path) == 200:      # 4. path exists
-            _dprint(f"`{path}` already exists")
-            return
-        self.__wrap(self.__mrc.folder_add(path))
+        #if self.__mrc.exists(path) == 200:      # 4. path exists
+        #    _dprint(f"`{path}` already exists")
+        #    return
+        rsp = self.__wrap(self.__mrc.folder_add(path))
+        if (rsp):
+            print(rsp)
 
     def _do_rd(self, args):
         """Delete folder (ftp RMD[IR])"""
@@ -258,9 +260,16 @@ class Terminal(cmd.Cmd):
         """Delete file (ftp DELE[TE])"""
         self.__not_implemented()
 
-    def _do_cp(self, args):
-        """Copy file (ftp ???)"""
-        self.__not_implemented()
+    def do_cp(self, arg):
+        """Copy folder or file into folder\nUsage:
+        cp <src> <folder>"""
+        # TODO: check arg
+        # TODO: check folder on invalid chars
+        # TODO: rename mode
+        args = arg.split(' ', 2)
+        rsp = self.__wrap(self.__mrc.entry_copy(args[0], args[1]))
+        if (rsp):
+            print(rsp)
 
     def _do_mv(self, args):
         """Rename/move file/folder (ftp ?)"""

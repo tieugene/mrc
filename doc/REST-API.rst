@@ -152,26 +152,27 @@ Entry (5)
 Copy
 ````
 
+Creates parents if not exist
+
 :Resource: /file/copy
 :Method: POST
-:Description: Copy *Entry* into other folder
+:Description: Copy *Entry* into folder
 :Parameters:
     :home: *Path* - entry to copy
     :folder: *Path* - folder copy to
-    :conflict: `rename|rewrite|strict`
+    :[conflict]: `rename|rewrite|strict`
 :Response: new path
 :Error Codes:
+    :400: dst exists w/o conflict=rename; dst is not folder
     :404: Src Entry not exists
-    :...: dst folder not exists
-    :...: dst is file
-    :...: new name is path
+    :507: cp to r/o mounted
 
 Move
 ````
 
 :Resource: /file/move
 :Method: POST
-:Description: Move *Entry* into other folder
+:Description: Move *Entry* into folder
 :Parameters:
     :home: *Path* - Entry to move
     :folder: *Path* - Folder move to
@@ -239,7 +240,7 @@ File History
 Folder
 ~~~~~~
 
-...Folder List
++Folder List
 ```````````
 
 :Resource: /folder
@@ -266,6 +267,8 @@ Folder Tree
 
 +Folder New
 ``````````
+
+Create parents if not exist
 
 :Resource: /folder/add
 :Method: POST
