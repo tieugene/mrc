@@ -251,13 +251,13 @@ class Terminal(cmd.Cmd):
         if (rsp):
             print(rsp)
 
-    def _do_rd(self, args):
-        """Delete folder (ftp RMD[IR])"""
-        self.__not_implemented()
-
-    def _do_get(self, args):
-        """Download file (ftp GET)"""
-        self.__not_implemented()
+    def do_get(self, arg):
+        """Download file (ftp GET)\nUsage:
+        get <path> [<localfile> (default - same as src *Name*]"""
+        rsp = self.__wrap(self.__mrc.entry_info(arg))
+        if rsp:
+            assert rsp['type'] == 'file'
+            self.__mrc.file_get(arg, rsp['name'])
 
     def _do_put(self, args):
         """Upload file (ftp PUT)"""

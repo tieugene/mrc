@@ -1,3 +1,6 @@
+* Chunks:
+  * upload files w/ 'chunk' option
+  * download files sequence into one file
 * MRC API docs (rST/openAPI):
   * [rST](https://github.com/ezsystems/ezpublish-kernel/blob/master/doc/specifications/rest/REST-API-V2.rst#delete-subtree)
   * [OpenAPI](https://github.com/OAI/OpenAPI-Specification) ([editor](https://editor.swagger.io))

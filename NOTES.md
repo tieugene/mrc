@@ -11,32 +11,16 @@
 - [C@MR downloader PHP](https://github.com/Geograph-us/Cloud-Mail.Ru-Downloader)
 
 ## Idea:
-- cache metainfo into key-value file:
+- cache entries metainfo into key-value file:
   - [Redis](https://redislabs.com/lp/python-redis/) ([tour](https://python-scripts.com/redis))
   - Memcached
   - [Tokyo cabinet](https://pythonhosted.org/tokyocabinet-python/)
   - [BDB](https://docs.python.org/2/library/bsddb.html)
   - [UniQLite](http://charlesleifer.com/blog/introduction-to-the-fast-new-unqlite-python-bindings/)
   - Sqlite
-- rsync-like utility specially for mrc (sha1)
+- rsync-like utility specially for mrc (sha1-based)
 
 ## Note:
-> В названии папок нельзя использовать символы «" * / : < > ? \ |». Также название не может состоять только из точки «.» или из двух точек «..»
-
-Invalid chars: `"*:<>?\|`
-
-Response status codes:
-- 200 - ok
-- 400 - Bad Request (e.g. required params absent)
-- 403 - Forbidden (no token)
-- 404 - Not Found (e.g. object really not exists)
-- 406 - Not Acceptable (e.g. /file/history for folder)
-
-Response content:
-- email: `account`
-- status: response code
-- time: unixtime
-- body: payload
 
 ## Start:
 SDC - Streamset Data Collector
@@ -82,39 +66,10 @@ SDC - Streamset Data Collector
   - ~~Cache-Control~~: no-store, no-cache, must-revalidate
   - Date
 
-### Entry:
-- common:
-  - kind:str=folder/file
-  - type:str=folder/file
-  - home:str - full path (/...)
-  - name:str - name
-  - [message:str = ""]
-  - ["weblink:str - after ("EDAS/ZegcnyJrJ")]
-  - ["weblink_access_rights:str = "r"]
-  - [size:int] - folder: in folder? request only
-- Folder:
-  - count:{files:int, folders:int}
-  - grev:int
-  - rev:int
-  - tree:int?
-- File:
-  - hash:hex(40X) - ?SHA-1
-  - mtime:int - ?unixtime
-  - virus_scan:str = "pass"
-
-====
-mkdir /tmp/2. rev/grev
-B4:
-- /:        13852/13857
-- /tmp:     13857/13857
-After:
-- /:        13852/13858
-- /tmp:     13858/13858
-- /tmp/2:   13858/13858
-
 Guess:
 rev: изменился _состав_ и/или _размер_ _этой_ папки
 grev: ... подчиненной ...
+rrev: ?
 
 ==== Download ====
 1. https://cloud.mail.ru/public/31Zh/4bBd2Ujau - получаем печеньки

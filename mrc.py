@@ -46,8 +46,8 @@ class MailRuCloudClient:
         self.__login = None
         self.__password = None
         self.__token = None
-        self.__dURL = None  # like https://cloclo4.cloud.mail.ru/attach/
-        self.__uURL = None  # like https://cld-upload4.cloud.mail.ru/upload-web/
+        self.__dURL = None  # /dispatcher['body']['get'][0]['url']; e.g. https://cloclo4.cloud.mail.ru/attach/
+        self.__uURL = None  # /dispatcher['body']['upload'][0]['url']; e.g. https://cld-upload4.cloud.mail.ru/upload-web/
 
     def __debug_response(self, response: Response) -> None:
         """
@@ -269,6 +269,25 @@ class MailRuCloudClient:
         """
         return self.__do_post(SCLD_FILEREMOVE_ENDPOINT, {'home': path})
 
+    def file_get(self, path, dst_path):
+        """
+        Read (download) file
+        :param path:
+        :param dst_path:
+        :return: Ok/403/404
+        """
+        '''
+        response = self.session.get(self.__dURL[:-1] + path, stream=True)
+        with open(outfilename, "wb") as handle:
+            for data in tqdm(response.iter_content(chunk_size=1024), unit='KB', total=int(metadata['size'] / 1024)):
+                handle.write(data)
+        or:
+        open(outfilename, 'wb').write(requests.get(url).content)
+        '''
+        url = self.__dURL[:-1] + path
+        _dprint("Get '{}' into '{}'".format(url, dst_path))
+        open(dst_path, 'wb').write(requests.get(url).content)
+
     def _file_put(self, path, src_path, resolve):
         """
         Create (upload) new file
@@ -278,14 +297,6 @@ class MailRuCloudClient:
         :return:
         """
         pass
-
-    def _file_get(self, path, dst_path):
-        """
-        Read (download) file
-        :param path:
-        :param dst_path:
-        :return: Ok/403/404
-        """
 
     def folder_add(self, path: str, resolve: str = None):
         """

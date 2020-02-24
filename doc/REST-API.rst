@@ -35,7 +35,7 @@ Terms
 :Tree:
     %24d (e.g. `643031373030323930303030`) - 18-byte B64 ?
 :Hash:
-    %40X (e.g. `...`) - 20-byte
+    %40X (e.g. `...`) - 20-byte SHA1
 :Conflict:
     - rename - target stay `path (1)` if target path occupied
     - rewrite -
