@@ -67,8 +67,8 @@ Common
     :507:
         Writing into R/O mounted foreign share
 
-Entry (5)
-~~~~~~~~~
++Entry (5)
+~~~~~~~~~~
 
 +Info
 `````
@@ -147,8 +147,8 @@ Creates parents if not exist
     :200: Everywhere
     :507?:
 
-File
-~~~~
+File (2)
+~~~~~~~~
 
 File Upload
 ```````````
@@ -169,8 +169,8 @@ File History
     :home: *Path*
 :Response:
 
-Folder
-~~~~~~
+Folder (3)
+~~~~~~~~~~
 
 +Folder List
 ````````````
@@ -215,8 +215,8 @@ Create parents if not exist
     :200: str - new folder path
     :400: json if *not* `rename` (e.g. {'home': {'error': 'exists', 'value': 'Path'}})
 
-Trashbin
-~~~~~~~~
++Trashbin (3)
+~~~~~~~~~~~~~
 
 +Trashbin List
 ```````````````
@@ -264,31 +264,81 @@ Target folder must exist.
         - restore_revision not exists in trash
     :507: target folder is mounted r/o
 
-Sharing (16)
-~~~~~~~~~~~~
-* Public - 2+
-* Share out - 2+
-* Share in (invites) - 5+
++Public (5)
+~~~~~~~~~~~
 
-Publish
-```````
++Publish
+````````
+
+Return same weblink on each publishing.
 
 :Resource: /file/publish
 :Method: POST
-:Description: Publish entry
+:Description: Make public
 :Parameters:
-    :path: *Path*
-:Response: *Weblink*
+    :path: *Path* - entry to publish
+:Response: *Weblink* (e.g. '3Na6/w7WhtLcTs')
+:Error Codes:
+    :404: entry not exists
 
-Unpublish
-`````````
++Unpublish
+``````````
+
+Returns OK on any .+/.+
 
 :Resource: /file/unpublish
 :Method: POST
-:Description: Unpublish entry
+:Description: Remove public
+:Parameters:
+    :weblink: *Weblink* - to unpublish
+:Response: *Weblink* - same as input parameters
+:Error Codes: None
+
++Public info
+````````````
+
+:Resource: /weblinks
+:Method: GET
+:Description: Get public info
 :Parameters:
     :weblink: *Weblink*
-:Response: *Weblink*
+:Response:
+    :long: %12w<path> (e.g. 4CwiqLNTUjPS/2/) - seems 9-bytes B64 + path
+    :short: *Weblink* as is
+:Error Codes:
+    :404: weblink not exists
+
++Set public RO
+``````````````
+
+Not produces error on repeated action.
+
+:Resource: /weblinks/readonly
+:Method: POST
+:Description: Set published RO
+:Parameters:
+    :weblink: *Weblink*
+:Response: *Weblink* as is
+:Error Codes:
+    :404: weblink not exists
+
++Set public RW
+``````````````
+
+Not produces error on repeated action.
+Works for file (!).
+
+:Resource: /weblinks/writable
+:Method: POST
+:Description: Set published RW
+:Parameters:
+    :weblink: *Weblink*
+:Response: *Weblink* as is
+:Error Codes: weblink is ro mounted
+    :404: weblink not exists
+
+Share (8)
+~~~~~~~~~
 
 Share folder
 ````````````
@@ -336,16 +386,6 @@ Unmount shared
     :clone_copy: `true|false`
 :Response:
 
-???
-```
-
-:Resource: /folder/shared
-:Method: GET?
-:Description: ???
-:Parameters: ???
-:Response:
-    :403: user
-
 List invites (?)
 ````````````````
 
@@ -353,25 +393,6 @@ List invites (?)
 :Method: GET
 :Description: List incoming invites (?)
 :Parameters:
-:Response:
-
-Published info (?)
-``````````````````
-
-:Resource: /folder/shared/info
-:Method: GET
-:Description: Get published entry info
-:Parameters:
-:Response:
-
-List ...
-````````
-
-:Resource: /folder/shared/links
-:Method: GET
-:Description: List ...
-:Parameters:
-    :home: *Path*
 :Response:
 
 List invites
@@ -403,34 +424,36 @@ Reject invite
     :invite_token: ...
 :Response:
 
-Get share info
-````````````````
+Unsorted (3)
+~~~~~~~~~~~~
 
-:Resource: /weblinks
+???
+```
+
+:Resource: /folder/shared
+:Method: GET?
+:Description: ???
+:Parameters: ???
+:Response:
+    :403: user
+
+Published info (?)
+``````````````````
+
+:Resource: /folder/shared/info
 :Method: GET
-:Description: Get share (?) info
+:Description: Get published entry info
 :Parameters:
-    :weblink: *Weblink*
 :Response:
 
-Set share RO
-````````````
+List ...
+````````
 
-:Resource: /weblinks/readonly
-:Method: POST
-:Description: Set published RO
+:Resource: /folder/shared/links
+:Method: GET
+:Description: List ...
 :Parameters:
-    :weblink: *Weblink*
-:Response:
-
-Set share RW
-````````````
-
-:Resource: /weblinks/writable
-:Method: POST
-:Description: Set published RW
-:Parameters:
-    :weblink: *Weblink*
+    :home: *Path*
 :Response:
 
 Misc (7)

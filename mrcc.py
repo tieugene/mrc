@@ -5,6 +5,9 @@
 # Powered by:
 # - https://gitlab.com/Kanedias/MARC-FS - working prototype
 # - https://github.com/mad-gooze/PyMailCloud - python tricks
+# TODO: pub:
+#  - collapse 5 to 1 (pub <resource> on/off/info/ro/rw)
+#  - handle as weblink as path
 
 import json
 import os
@@ -311,7 +314,7 @@ class Terminal(cmd.Cmd):
         rsp = self.__wrap(self.__mrc.trash_list())
         if rsp and rsp['list']:
             # 1. head
-            #line = 42 * '-'
+            # line = 42 * '-'
             line = '-----+-----------------+-------------+----'
             print(line)
             print('{:5} {:17} {:13} Name [deleted from]'.format('Rev', 'Deleted', 'Size'))
@@ -343,6 +346,34 @@ class Terminal(cmd.Cmd):
         # TODO: rename option
         args = arg.split()
         rsp = self.__wrap(self.__mrc.trash_restore(int(args[0]), self.__norm_path(args[1])))
+
+    def do_pub(self, arg):
+        """Publish entry.\nUsage:
+        pub <path>"""
+        rsp = self.__wrap(self.__mrc.entry_publish(self.__norm_path(arg)))
+        print(rsp)
+
+    def do_unpub(self, arg):
+        """Unpublish entry.\nUsage:
+        unpub <path>"""
+        rsp = self.__wrap(self.__mrc.pub_close(arg))
+
+    def do_pub_info(self, arg):
+        """Get public info.\nUsage:
+        pub <path>"""
+        rsp = self.__wrap(self.__mrc.pub_info(arg))
+        if rsp:
+            print("Long={}, Short={}".format(rsp['long'], rsp['short']))
+
+    def do_pub_ro(self, arg):
+        """Set public ro.\nUsage:
+        pub_ro <path>"""
+        rsp = self.__wrap(self.__mrc.pub_ro(arg))
+
+    def do_pub_rw(self, arg):
+        """Set public rw.\nUsage:
+        pub_ro <path>"""
+        rsp = self.__wrap(self.__mrc.pub_rw(arg))
 
     def do_df(self, args):
         """Display free disk space"""

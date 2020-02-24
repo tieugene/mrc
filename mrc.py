@@ -269,7 +269,7 @@ class MailRuCloudClient:
         """
         return self.__do_post(SCLD_FILEREMOVE_ENDPOINT, {'home': path})
 
-    def _file_add(self, path, src_path, resolve):
+    def _file_put(self, path, src_path, resolve):
         """
         Create (upload) new file
         :param path:
@@ -279,7 +279,7 @@ class MailRuCloudClient:
         """
         pass
 
-    def _file_read(self, path, dst_path):
+    def _file_get(self, path, dst_path):
         """
         Read (download) file
         :param path:
@@ -336,6 +336,46 @@ class MailRuCloudClient:
         if resolve:
             h['conflict'] = resolve
         return self.__do_post(SCLD_TRASHRESTORE_ENDPOINT, h)
+
+    def entry_publish(self, path: str) -> object:
+        """
+        Publish entry
+        :param path - entry to publish
+        :return: Response
+        """
+        return self.__do_post(SCLD_FILEPUBLISH_ENDPOINT, {"home": path})
+
+    def pub_close(self, weblink: str) -> object:
+        """
+        Unpublish entry
+        :param weblink - weblink to unpublish
+        :return: Response
+        """
+        return self.__do_post(SCLD_FILEUNPUBLISH_ENDPOINT, {"weblink": weblink})
+
+    def pub_info(self, weblink: str) -> object:
+        """
+        Get published info
+        :param weblink - weblink to get info
+        :return: Response
+        """
+        return self.__do_post(SCLD_WEBLINKRO_ENDPOINT, {"weblink": weblink})
+
+    def pub_ro(self, weblink: str) -> object:
+        """
+        Set public read-only
+        :param weblink - weblink to set ro
+        :return: Response
+        """
+        return self.__do_post(SCLD_WEBLINKRO_ENDPOINT, {"weblink": weblink})
+
+    def pub_rw(self, weblink: str) -> object:
+        """
+        Set public read-write
+        :param weblink - weblink to set rw
+        :return: Response
+        """
+        return self.__do_post(SCLD_WEBLINKRW_ENDPOINT, {"weblink": weblink})
 
     def user_space(self) -> object:
         """
