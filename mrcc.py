@@ -254,10 +254,11 @@ class Terminal(cmd.Cmd):
     def do_get(self, arg):
         """Download file (ftp GET)\nUsage:
         get <path> [<localfile> (default - same as src *Name*]"""
-        rsp = self.__wrap(self.__mrc.entry_info(arg))
+        path = self.__norm_path(arg)
+        rsp = self.__wrap(self.__mrc.entry_info(path))
         if rsp:
             assert rsp['type'] == 'file'
-            self.__mrc.file_get(arg, rsp['name'])
+            self.__mrc._file_get(path, rsp['name'])
 
     def _do_put(self, args):
         """Upload file (ftp PUT)"""

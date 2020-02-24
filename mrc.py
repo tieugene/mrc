@@ -269,9 +269,10 @@ class MailRuCloudClient:
         """
         return self.__do_post(SCLD_FILEREMOVE_ENDPOINT, {'home': path})
 
-    def file_get(self, path, dst_path):
+    def _file_get(self, path, dst_path):
         """
-        Read (download) file
+        Read (download) file.
+        Note: w.o. token, but in the session
         :param path:
         :param dst_path:
         :return: Ok/403/404
@@ -284,9 +285,13 @@ class MailRuCloudClient:
         or:
         open(outfilename, 'wb').write(requests.get(url).content)
         '''
-        url = self.__dURL[:-1] + path
-        _dprint("Get '{}' into '{}'".format(url, dst_path))
-        open(dst_path, 'wb').write(requests.get(url).content)
+        _dprint("Get '{}' from '{}' into '{}'...".format(path, self.__dURL[:-1], dst_path), end='')
+        rsp = self.__session.get(self.__dURL[:-1] + path)   # token is optional
+        if rsp:
+            open(dst_path, 'wb').write(rsp.content)
+            _dprint("OK")
+        else:
+            _dprint("Oops {} ({}).".format(rsp.status_code, rsp.reason))
 
     def _file_put(self, path, src_path, resolve):
         """
