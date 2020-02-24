@@ -317,13 +317,26 @@ class MailRuCloudClient:
         # TODO: get cached
         return self.__do_get(SCLD_TRASH_ENDPOINT)
 
+    def trash_restore(self, rev: int, path: str, resolve: str = None) -> object:
+        """
+        Restore entry from trash
+        :param rev: entry to restore
+        :param path: target path
+        :param resolve:
+        :return Response
+        """
+        h = {'restore_revision': rev, 'path': path}
+        if resolve:
+            h['conflict'] = resolve
+        return self.__do_get(SCLD_TRASHRESTORE_ENDPOINT, h)
+
     def user_space(self) -> object:
         """
         Space used
         :return Response
         """
-        if not self.__token:
-            raise MailRuCloudError.NotLoggedIn()  # get out
+        #if not self.__token:
+        #    raise MailRuCloudError.NotLoggedIn()  # get out
         return self.__do_get(SCLD_SPACE_ENDPOINT)
 
     def any(self, method: str, url: str, payload: dict):

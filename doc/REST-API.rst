@@ -139,7 +139,8 @@ Creates parents if not exist
 :Parameters:
     :home: *Path* - entry to remove
     :[hash]: anything
-:Response: path
+:Response:
+    *Path* - removed entry
 :Error Codes:
     :200: Everywhere
     :507?:
@@ -182,7 +183,8 @@ Folder
     :sort:
         :type: `name|mtime|size`
         :order: `asc|desc`
-:Response: <Folder> + list[]
+:Response:
+    <Folder> + list[]
 
 Folder Tree
 ```````````
@@ -192,7 +194,8 @@ Folder Tree
 :Description: List folders from /
 :Parameters:
     :home: *Path*
-:Response: list of 'List Folder's
+:Response:
+    list of 'List Folder's
 
 +Folder New
 ```````````
@@ -206,6 +209,7 @@ Create parents if not exist
     :home: *Path*
     :[conflict]: `rename|rewrite|strict`
 :Response:
+:Error Codes:
     :200: str - new folder path
     :400: json if *not* `rename` (e.g. {'home': {'error': 'exists', 'value': 'Path'}})
 
@@ -219,7 +223,9 @@ Trashbin List
 :Method: GET
 :Description: List *Trashbin* content
 :Parameters:
+    *None*
 :Response:
+    *TrashList*
 
 Trashbin Empty
 ``````````````
@@ -232,15 +238,29 @@ Trashbin Empty
 
 File Restore
 ````````````
+Target folder must exist.
+- Mount become simple folder
+- Share become simple folder
+- published stay published
 
-:Resource: /trashbin/empty
+:Resource: /trashbin/restore
 :Method: POST
 :Description: Restore *File* from Trash
 :Parameters:
-    :path: *Path*
-    :restore_revisiion: int
-    :conflict: *Conflict* (usual rename)
+    :path: *Path* - target path restore to (or *Name* if to /}
+    :restore_revision: int - unique id of trash entry
+    :[conflict]: *Conflict*
 :Response:
+    :rev:
+        - *Tree* - ?
+        - int - new rev of tree restored to (?)
+    :[name]:
+        Restored *Name* when set conflict=rename
+:Error Codes:
+    :400:
+        - target path is occupied (w/o conflict=rename)
+        - restore_revision not exists in trash
+    :507: target folder is mounted r/o
 
 Sharing (16)
 ~~~~~~~~~~~~

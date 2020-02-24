@@ -306,19 +306,35 @@ class Terminal(cmd.Cmd):
     def do_trash(self, arg):
         """List trash content\nUsage:
         trash"""
+        # TODO: check entries keys (e.g. mounts or shares)
         rsp = self.__wrap(self.__mrc.trash_list())
         if rsp:
             # 1. head
-            line = 42 * '-'
+            #line = 42 * '-'
+            line = '-----+-----------------+-------------+----'
             print(line)
-            print('Kind   Type   Rev {:17} {:13} Src//Name'.format('Deleted', 'Size'))
+            print('{:5} {:17} {:13} Name [deleted from]'.format('Rev', 'Deleted', 'Size'))
             print(line)
             # 2. body
             for f in rsp['list']:
-                print('{:6} {:6} {:3d} {:17} {:13d} {}|{}'.format(
-                    f['kind'], f['type'], f['rev'], self.__ut2dt(f['deleted_at'], '%y.%m.%d %H:%M:%S'), f['size'],
-                    f['deleted_from'], f['name']
+                assert f['type'] == f['kind']
+                assert f['type'] in set(('folder', 'file'))
+                name = f['name']
+                if f['type'] == 'folder':
+                    name += '/'
+                print('{:5d} {:17} {:13d} {} [{}]'.format(
+                    f['rev'], self.__ut2dt(f['deleted_at'], '%y.%m.%d %H:%M:%S'), f['size'], name, f['deleted_from']
                 ))
+            print(line)
+
+    def do_restore(self, arg):
+        """Restore entry from trash.\nUsage:
+        restore <rev> <new_path> [rename]"""
+        # TODO: chech arg
+        # TODO: check target folder exists
+        # TODO: rename option
+        args = arg.split()
+        rsp = self.__wrap(self.__mrc.trash_restore(int(args[0]), self.__norm_path(args[1])))
 
     def do_df(self, args):
         """Display free disk space"""
