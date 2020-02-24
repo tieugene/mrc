@@ -21,7 +21,6 @@ Requests
 Overview
 ~~~~~~~~
 
-
 Terms
 `````
 
@@ -42,66 +41,6 @@ Terms
     - rewrite -
     - strict -
 
-Entry info
-``````````
-
-:kind:
-    `file`|`folder`
-:type:
-    `file`|`folder`|`shared`|`mounted`
-:home:
-    <Path>
-:name:
-    str
-:tree:
-    <Tree>
-:[weblink]:
-    <Weblink> - for published
-:[weblink_access_rights]:
-    `r`|`rw` - for published (files - r only)
-:[message]:
-    `` - for published
-
-File info
-`````````
-
-:kind:
-    `file`
-:type:
-    `file`
-:mtime:
-    int - unixtime
-:size:
-    int
-:hash:
-    *Hash*
-:virus_scan:
-    `pass`|`fail`|`not_yet`
-
-Folder info (short)
-```````````````````
-
-:kind:
-    `folder`
-:type:
-    - `folder` - simply folder
-    - `shared` - my shared folder
-    - `mounted` - foreign shared; cannot be shared; published inside rights (can't publish as rw for ro mounts)
-:count:
-    {'folders': 0, 'files': 0}
-:rev:
-    int
-:grev:
-    int
-:[rrev]:
-    int - for mounted only
-:[readonly]:
-    `True`, for RO mounted only
-:[size]:
-    int - in /folder request only
-:[list]:
-    [] - in /folder request only
-
 Common
 ~~~~~~
 
@@ -111,21 +50,13 @@ Common
         *Token*
     :[api]:
         2
-:Response:
-    :email:
-        ...
-    :status:
-        ...
-    :time:
-        ...
-    :body:
-        ...
+:Response: *Response*
 :Error Codes:
     :200:
         OK
     :400:
         Bad Request (e.g. required params absent)
-    :401 ?:
+    :401?:
         Unauthorized
     :403:
         Forbidden (not logged in)
@@ -138,7 +69,7 @@ Entry (5)
 ~~~~~~~~~
 
 +Info
-````
+`````
 
 :Resource: /file
 :Method: GET
@@ -150,7 +81,7 @@ Entry (5)
     :404: Entry not exists
 
 +Copy
-````
+`````
 
 Creates parents if not exist
 
@@ -160,7 +91,7 @@ Creates parents if not exist
 :Parameters:
     :home: *Path* - entry to copy
     :folder: *Path* - folder copy to
-    :[conflict]: `rename|rewrite|strict`
+    :[conflict]: *Conflict*
 :Response: new path
 :Error Codes:
     :400: target exists (w/o conflict=rename); dst is not folder
@@ -168,7 +99,7 @@ Creates parents if not exist
     :507: dst is r/o mounted
 
 +Move
-````
+`````
 
 :Resource: /file/move
 :Method: POST
@@ -184,7 +115,7 @@ Creates parents if not exist
     :507: dst is r/o mounted
 
 +Rename
-``````
+```````
 
 :Resource: /file/rename
 :Method: POST
@@ -200,7 +131,7 @@ Creates parents if not exist
     :507?: src folder is r/o mounted
 
 +Remove
-``````
+```````
 
 :Resource: /file/remove
 :Method: POST
@@ -239,7 +170,7 @@ Folder
 ~~~~~~
 
 +Folder List
-```````````
+````````````
 
 :Resource: /folder
 :Method: GET
@@ -261,10 +192,10 @@ Folder Tree
 :Description: List folders from /
 :Parameters:
     :home: *Path*
-:Response: list of `List Folder`s
+:Response: list of 'List Folder's
 
 +Folder New
-``````````
+```````````
 
 Create parents if not exist
 
@@ -308,7 +239,7 @@ File Restore
 :Parameters:
     :path: *Path*
     :restore_revisiion: int
-    :conflict: `rename|rewrite|strict` (usual rename)
+    :conflict: *Conflict* (usual rename)
 :Response:
 
 Sharing (16)
@@ -369,7 +300,7 @@ Mount shared
 :Description: Mount foreign share
 :Parameters:
     :invite_token: ...
-    :conflict: `rename|rewrite|strict` (usual rename)
+    :conflict: *Conflict* (usual rename)
 :Response:
 
 Unmount shared
@@ -483,6 +414,16 @@ Set share RW
 Misc (7)
 ~~~~~~~~
 
+Get ? Token
+```````````
+
+:Resource: /tokens
+:Method: POST
+:Description:
+:Parameters:
+:Response:
+    :token: %40d
+
 Get Token
 `````````
 
@@ -538,13 +479,15 @@ Used space
 :Method: GET
 :Description: Get used/available space
 :Parameters: None
-:Response: {"bytes_used":<int>,"bytes_total":<int>}
+:Response:
+    :bytes_used: int
+    :bytes_total: int
 
 Zip
 ```
 
 :Resource: /zip
 :Method: GET
-:Description: Get ziped entries
+:Description: Get zipped entries
 :Parameters:
 :Response:

@@ -75,6 +75,10 @@ class Terminal(cmd.Cmd):
         self.__cpath = '/'
         self.__update_prompt()
 
+    def __ut2dt(self, ut, m):
+        """Converts unixtime into datetime"""
+        return datetime.datetime.fromtimestamp(ut).strftime(m)
+
     def __not_implemented(self):
         print('Command not implemented yet.')
 
@@ -186,7 +190,6 @@ class Terminal(cmd.Cmd):
                 __tree = i['tree']
                 line = 42 * '-'
                 # 1. head
-                print('{} (rev {}, grev {}):'.format(i['home'], i['rev'], i['grev']))
                 print(line)
                 print('PMST dirs files rev   grev  {:13} Name'.format('Size'))
                 print('   V date       time')
@@ -216,8 +219,8 @@ class Terminal(cmd.Cmd):
                             f['size'], f['name']
                         ))
                 # 3. bottom
-                print('{}\n     {:4d} {:5d} {:25d}'.format(
-                    line, i['count']['folders'], i['count']['files'], i['size']
+                print('{}\n     {:4d} {:5d} {:5d} {:5d} {:13d} {}'.format(
+                    line, i['count']['folders'], i['count']['files'], i['rev'], i['grev'], i['size'], i['home']
                 ))
             else:
                 for f in i['list']:
@@ -288,17 +291,34 @@ class Terminal(cmd.Cmd):
         # TODO: rename mode
         args = arg.split(' ', 2)
         rsp = self.__wrap(self.__mrc.entry_rename(self.__norm_path(args[0]), args[1]))
-        if (rsp):
+        if rsp:
             print(rsp)
 
     def do_rm(self, arg):
-        """Delete file (ftp DELE[TE])\nUsage:
+        """Remove entry to trash (ftp DELE[TE])\nUsage:
         rm <path>"""
-        # TODO: check arg
+        # TODO: check arg exists
         # TODO: check entry exists
         rsp = self.__wrap(self.__mrc.entry_remove(self.__norm_path(arg)))
-        if (rsp):
+        if rsp:
             print(rsp)
+
+    def do_trash(self, arg):
+        """List trash content\nUsage:
+        trash"""
+        rsp = self.__wrap(self.__mrc.trash_list())
+        if rsp:
+            # 1. head
+            line = 42 * '-'
+            print(line)
+            print('Kind   Type   Rev {:17} {:13} Src//Name'.format('Deleted', 'Size'))
+            print(line)
+            # 2. body
+            for f in rsp['list']:
+                print('{:6} {:6} {:3d} {:17} {:13d} {}|{}'.format(
+                    f['kind'], f['type'], f['rev'], self.__ut2dt(f['deleted_at'], '%y.%m.%d %H:%M:%S'), f['size'],
+                    f['deleted_from'], f['name']
+                ))
 
     def do_df(self, args):
         """Display free disk space"""
@@ -314,6 +334,7 @@ class Terminal(cmd.Cmd):
         :return status_code, content[:json]
         example: cmd get /file {"home":"/tmp"}
         """
+        # TODO: optional payload
         args = arg.split(' ', 2)
         if len(args) != 3:
             print('Wrong args number')

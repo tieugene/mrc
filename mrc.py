@@ -132,13 +132,13 @@ class MailRuCloudClient:
         # self.__debug_response(response)
         if (response):
             try:
-                js = response.json()    # json.loads(response.content.decode("utf-8"))
+                js = response.json()  # json.loads(response.content.decode("utf-8"))
             except:
                 _dprint('Response is not json')
                 return False
             if ('body' in js) and ('token' in js['body']):
                 self.__token = js['body']['token']
-                #dprint(self.__token)
+                # dprint(self.__token)
                 return True
             _dprint('Not `body` or `token` keys: {}'.format(js))
         else:
@@ -181,7 +181,7 @@ class MailRuCloudClient:
         if not self.__token:
             raise MailRuCloudError.NotLoggedIn()
 
-    def exists(self, path:str) -> int:
+    def exists(self, path: str) -> int:
         """
         Test entry exists (B4 creating)
         :param path: entry to test
@@ -200,7 +200,7 @@ class MailRuCloudClient:
         :return: response
         :exception: requests.exceptions.ReadTimeout
         """
-        #if not self.__token:    # FIXME: raise NotAuth
+        # if not self.__token:    # FIXME: raise NotAuth
         #    return
         h = {"token": self.__token} if self.__token else {}
         return self.__session.get(url=endpoint, params={**h, **payload})
@@ -222,13 +222,10 @@ class MailRuCloudClient:
         :param path:
         :return: Response
         """
-        #self.__chk_token()  # get out
-        return self.__do_get(
-            SCLD_FILE_ENDPOINT,
-            {'home': path}
-        )
+        # self.__chk_token()  # get out
+        return self.__do_get(SCLD_FILE_ENDPOINT, {'home': path})
 
-    def entry_copy(self, path:str, folder:str, resolve:str = None) -> Response:
+    def entry_copy(self, path: str, folder: str, resolve: str = None) -> object:
         """
         Copy entry into folder.
         :param path: entry to copy
@@ -240,7 +237,7 @@ class MailRuCloudClient:
             h['conflict'] = resolve
         return self.__do_post(SCLD_FILECOPY_ENDPOINT, h)
 
-    def entry_move(self, path:str, folder:str, resolve:str = None) -> Response:
+    def entry_move(self, path: str, folder: str, resolve: str = None) -> object:
         """
         Move entry into folder.
         :param path: entry to move
@@ -252,7 +249,7 @@ class MailRuCloudClient:
             h['conflict'] = resolve
         return self.__do_post(SCLD_FILEMOVE_ENDPOINT, h)
 
-    def entry_rename(self, path:str, name:str, resolve:str = None) -> Response:
+    def entry_rename(self, path: str, name: str, resolve: str = None) -> object:
         """
         Rename entry inplace
         :param path:
@@ -264,7 +261,7 @@ class MailRuCloudClient:
             h['conflict'] = resolve
         return self.__do_post(SCLD_FILERENAME_ENDPOINT, h)
 
-    def entry_remove(self, path:str) -> Response:
+    def entry_remove(self, path: str) -> object:
         """
         Remove entry into trashbin
         :param path: entry to del
@@ -290,7 +287,7 @@ class MailRuCloudClient:
         :return: Ok/403/404
         """
 
-    def folder_add(self, path:str, resolve:str = None):
+    def folder_add(self, path: str, resolve: str = None):
         """
         Create new folder.
         Return body: {"email":<login>>,"body":<path>>,"time":<timestamp>,"status":200}
@@ -303,26 +300,33 @@ class MailRuCloudClient:
             h['conflict'] = resolve
         return self.__do_post(SCLD_FOLDERADD_ENDPOINT, h)
 
-    def folder_list(self, path):
+    def folder_list(self, path: str) -> object:
         """
         Get folder content.
-        TODO: get cached
         :param path:
         :return: folder/403/404/is file
         """
-        return self.__do_get(
-            SCLD_FOLDER_ENDPOINT,
-            {'home': path}
-        )
+        # TODO: get cached
+        return self.__do_get(SCLD_FOLDER_ENDPOINT, {'home': path})
 
-    def user_space(self) -> dict:
-        """Space used"""
+    def trash_list(self) -> object:
+        """
+        Get trashbin content.
+        :return:
+        """
+        # TODO: get cached
+        return self.__do_get(SCLD_TRASH_ENDPOINT)
+
+    def user_space(self) -> object:
+        """
+        Space used
+        :return Response
+        """
         if not self.__token:
             raise MailRuCloudError.NotLoggedIn()  # get out
-        print("Go further")
         return self.__do_get(SCLD_SPACE_ENDPOINT)
 
-    def any(self, method:str, url:str, payload:dict):
+    def any(self, method: str, url: str, payload: dict):
         """
         Fetch any request.
         :param method: get/post/head
@@ -332,7 +336,7 @@ class MailRuCloudClient:
         :param payload: subj
         :return:Response
         """
-        if not self.__token:    # FIXME: raise NotAuth
+        if not self.__token:  # FIXME: raise NotAuth
             return
         endpoint = CLOUD_APIv2 + url
         if method == Rq.GET.value:
@@ -375,6 +379,7 @@ class MailRuCloudClient:
 
     def __test_exists(self, path):
         """Test entry exists"""
+
         def __try(url, name):
             response: Response = self.__session.head(
                 url=url,
@@ -384,5 +389,6 @@ class MailRuCloudClient:
                 }
             )
             print(f'{name}: {response.status_code}')
+
         __try(SCLD_FILE_ENDPOINT, 'File')
         __try(SCLD_FOLDER_ENDPOINT, 'Folder')

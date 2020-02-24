@@ -21,6 +21,9 @@ SCLD_FILEREMOVE_ENDPOINT = CLOUD_APIv2 + "/file/remove";
 SCLD_FILERENAME_ENDPOINT = CLOUD_APIv2 + "/file/rename";
 SCLD_FILEMOVE_ENDPOINT = CLOUD_APIv2 + "/file/move";
 SCLD_FILECOPY_ENDPOINT = CLOUD_APIv2 + "/file/copy";
+SCLD_TRASH_ENDPOINT = CLOUD_APIv2 + "/trashbin";
+SCLD_TRASHEMPTY_ENDPOINT = CLOUD_APIv2 + "/trashbin/empty";
+SCLD_TRASHRESTORE_ENDPOINT = CLOUD_APIv2 + "/trashbin/restore";
 
 
 class Rq(Enum):
