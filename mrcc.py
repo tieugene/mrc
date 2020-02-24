@@ -116,6 +116,7 @@ class Terminal(cmd.Cmd):
     def do_login(self, args):
         """Log in to server.\nUsage: login [username password]\nsusername and password can be stored in ~/.config/marcfs/config.json"""
         # TODO: handle args
+        # TODO: check login twice
         l, p = _load_account()
         self.__mrc.login(l, p)
 
@@ -308,7 +309,7 @@ class Terminal(cmd.Cmd):
         trash"""
         # TODO: check entries keys (e.g. mounts or shares)
         rsp = self.__wrap(self.__mrc.trash_list())
-        if rsp:
+        if rsp and rsp['list']:
             # 1. head
             #line = 42 * '-'
             line = '-----+-----------------+-------------+----'
@@ -326,6 +327,13 @@ class Terminal(cmd.Cmd):
                     f['rev'], self.__ut2dt(f['deleted_at'], '%y.%m.%d %H:%M:%S'), f['size'], name, f['deleted_from']
                 ))
             print(line)
+
+    def do_purge(self, arg):
+        """Empty trash.\nUsage:
+        purge"""
+        # TODO: chech arg
+        rsp = self.__wrap(self.__mrc.trash_empty())
+        print(rsp)
 
     def do_restore(self, arg):
         """Restore entry from trash.\nUsage:

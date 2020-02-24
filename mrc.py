@@ -317,6 +317,13 @@ class MailRuCloudClient:
         # TODO: get cached
         return self.__do_get(SCLD_TRASH_ENDPOINT)
 
+    def trash_empty(self) -> object:
+        """
+        Empty trashbin.
+        :return: Response
+        """
+        return self.__do_post(SCLD_TRASHEMPTY_ENDPOINT)
+
     def trash_restore(self, rev: int, path: str, resolve: str = None) -> object:
         """
         Restore entry from trash
@@ -328,7 +335,7 @@ class MailRuCloudClient:
         h = {'restore_revision': rev, 'path': path}
         if resolve:
             h['conflict'] = resolve
-        return self.__do_get(SCLD_TRASHRESTORE_ENDPOINT, h)
+        return self.__do_post(SCLD_TRASHRESTORE_ENDPOINT, h)
 
     def user_space(self) -> object:
         """

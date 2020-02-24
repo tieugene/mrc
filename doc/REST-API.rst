@@ -61,9 +61,11 @@ Common
     :403:
         Forbidden (not logged in)
     :404:
-        Not Found (e.g. object really not exists)
+        Not Found (e.g. entry really not exists)
     :406:
         Not Acceptable (e.g. /file/history for folder)
+    :507:
+        Writing into R/O mounted foreign share
 
 Entry (5)
 ~~~~~~~~~
@@ -216,8 +218,8 @@ Create parents if not exist
 Trashbin
 ~~~~~~~~
 
-Trashbin List
-`````````````
++Trashbin List
+```````````````
 
 :Resource: /trashbin
 :Method: GET
@@ -227,17 +229,17 @@ Trashbin List
 :Response:
     *TrashList*
 
-Trashbin Empty
-``````````````
++Trashbin Empty
+```````````````
 
 :Resource: /trashbin/empty
 :Method: POST
 :Description: Empty Trashbin
-:Parameters:
-:Response:
+:Parameters: None
+:Response: {}
 
-File Restore
-````````````
++Restore
+````````
 Target folder must exist.
 - Mount become simple folder
 - Share become simple folder
@@ -245,7 +247,7 @@ Target folder must exist.
 
 :Resource: /trashbin/restore
 :Method: POST
-:Description: Restore *File* from Trash
+:Description: Restore *Entry* from Trash
 :Parameters:
     :path: *Path* - target path restore to (or *Name* if to /}
     :restore_revision: int - unique id of trash entry
@@ -492,8 +494,8 @@ User edit
 :Parameters:
 :Response:
 
-Used space
-``````````
++Used space
+```````````
 
 :Resource: /user/space
 :Method: GET
