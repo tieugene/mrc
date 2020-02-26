@@ -20,83 +20,21 @@ from zipfile import ZipFile
 from enum import Enum
 import time
 # 2. PyQt
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.Qt import QKeySequence, QCursor, QDesktopServices
+from PySide2.QtWidgets import *
+from PySide2.QtCore import *
+from PySide2.QtGui import QIcon, QPixmap, QKeySequence, QCursor, QDesktopServices
+#from PySide2 import QKeySequence, QCursor, QDesktopServices
 
 TREEVIEW = True
 
 def dprint(s):
     print(s, file=sys.stderr)
 
-class helpWindow(QMainWindow):
-    def __init__(self):
-        super(helpWindow, self).__init__()
-        self.setStyleSheet(mystylesheet(myWindow()))
-        self.helpText = """<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--StartFragment--><span style=" font-family:'Helvetica'; font-size:11pt; font-weight:600; text-decoration: underline; color:#2e3436;">Shortcuts:</span></p><br>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">rename File (F2)</span></p>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">copy File(s) (Ctrl-C)</span></p>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">paste File(s) (Ctrl-V)</span></p>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">cut File(s) (Ctrl-X)</span></p>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">open with TextEditor (F6)</span></p>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">move File(s) to Trash(Del)</span></p>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">delete File(s) (Shift+Del)</span></p>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">find File(s) (Ctrl-F)</span></p>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">play with vlc (F3)</span></p>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">open folder in Terminal (F7)</span></p>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">execute File in Terminal (F8)</span>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">go back (Backspace)</span></p>
-<p style=" margin-top:2px; margin-bottom:2px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica'; font-size:10pt; color:#2e3436;">refresh View (F5)</span></p>
-<!--EndFragment--></p>
-                                        """
-        self.helpViewer = QLabel(self.helpText, self)
-        self.helpViewer.setAlignment(Qt.AlignCenter)
-        self.btnAbout = QPushButton("about")
-        self.btnAbout.setFixedWidth(80)
-        self.btnAbout.setIcon(QIcon.fromTheme("help-about"))
-        self.btnAbout.clicked.connect(self.aboutApp)
-
-        self.btnClose = QPushButton("Close")
-        self.btnClose.setFixedWidth(80)
-        self.btnClose.setIcon(QIcon.fromTheme("window-close"))
-        self.btnClose.clicked.connect(self.close)
-
-        widget = QWidget(self)
-        layout = QVBoxLayout(widget)
-
-        layout.addWidget(self.helpViewer)
-        layout.addStretch()
-        layout.addWidget(self.btnAbout, alignment=Qt.AlignCenter)
-        layout.addWidget(self.btnClose, alignment=Qt.AlignCenter)
-        self.setCentralWidget(widget)
-
-        #        self.setWindowFlags(Qt.FramelessWindowHint)
-        self.setWindowTitle("Help")
-        self.setWindowIcon(QIcon.fromTheme("help-about"))
-
-    def aboutApp(self):
-        sysinfo = QSysInfo()
-        myMachine = "currentCPU Architecture: " + sysinfo.currentCpuArchitecture() + "<br>" + sysinfo.prettyProductName() + "<br>" + sysinfo.kernelType() + " " + sysinfo.kernelVersion()
-        title = "about QFileManager"
-        message = """
-                    <span style='color: #3465a4; font-size: 20pt;font-weight: bold;text-align: center;'
-                    ></span></p><center><h3>QFileManager<br>1.0 Beta</h3></center>created by  
-                    <a title='Axel Schneider' href='http://goodoldsongs.jimdo.com' target='_blank'>Axel Schneider</a> with PyQt5<br><br>
-                    <span style='color: #555753; font-size: 9pt;'>©2019 Axel Schneider<br><br></strong></span></p>
-                        """ + myMachine
-        self.infobox(title, message)
-
-    def infobox(self, title, message):
-        QMessageBox(QMessageBox.Information, title, message, QMessageBox.NoButton, self,
-                    Qt.Dialog | Qt.NoDropShadowWindowHint | Qt.FramelessWindowHint).show()
-
 
 class myWindow(QMainWindow):
     def __init__(self):
         super(myWindow, self).__init__()
 
-        self.setStyleSheet(mystylesheet(self))
         self.setWindowTitle("Filemanager")
         self.setWindowIcon(QIcon.fromTheme("system- file-manager"))
         self.process = QProcess()
@@ -316,7 +254,7 @@ class myWindow(QMainWindow):
         # misc
         self.actionRefresh = QAction(QIcon.fromTheme("view-refresh"), "refresh View", triggered=self.refreshList, shortcut="F5")
         self.actionSwitchHide = QAction("show hidden Files", triggered=self.enableHidden)
-        self.actionHelp = QAction(QIcon.fromTheme("help"), "Help", triggered=self.showHelp)
+        self.actionHelp = QAction(QIcon.fromTheme("help"), "About", triggered=self.showHelp)
 
         # shortcuts
         self.actionFileRename.setShortcut(QKeySequence(Qt.Key_F2))
@@ -382,14 +320,7 @@ class myWindow(QMainWindow):
         self.treeview.setFocus()
 
     def showHelp(self):
-        top = self.y() + 26
-        left = self.width() / 2 - 100
-        dprint(top)
-        self.w = helpWindow()
-        self.w.setWindowFlags(Qt.FramelessWindowHint)
-        self.w.setWindowModality(Qt.ApplicationModal)
-        self.w.setGeometry(left, top, 300, 360)
-        self.w.show()
+        QMessageBox.about(self, "About", "This is about")
 
     def on_clicked(self, index):
         if self.treeview.selectionModel().hasSelection():
@@ -464,7 +395,7 @@ class myWindow(QMainWindow):
         self.treeview.setFocus()
 
     def infobox(self, message):
-        title = "QFilemager"
+        title = "QFilemanager"
         QMessageBox(QMessageBox.Information, title, message, QMessageBox.NoButton, self,
                     Qt.Dialog | Qt.NoDropShadowWindowHint).show()
 
@@ -634,122 +565,6 @@ class myWindow(QMainWindow):
         sysinfo = QSysInfo()
         myMachine = "current CPU Architecture: " + sysinfo.currentCpuArchitecture() + " *** " + sysinfo.prettyProductName() + " *** " + sysinfo.kernelType() + " " + sysinfo.kernelVersion()
         self.statusBar().showMessage(myMachine, 0)
-
-
-def mystylesheet(self):
-    return """
-QListView
-{
-background: #e9e9e9;
-selection-color: white;
-border: 1px solid lightgrey;
-selection-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #729fcf, stop: 1  #204a87);
-color: #202020;
-outline: 0;
-}
-QTreeView
-{
-background: #e9e9e9;
-selection-color: white;
-border: 1px solid lightgrey;
-selection-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #729fcf, stop: 1  #204a87);
-color: #202020;
-outline: 0;
-} 
-QTreeView::item::hover{
-background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #babdb6, stop: 0.5 #d3d7cf, stop: 1 #babdb6);
-}
-QTreeView::item::focus
-{
-background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #729fcf, stop: 1  #204a87);
-border: 0px;
-}
-QMenu
-{
-background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
-                                 stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);
-}
-QMenu::item::selected
-{
-color: white;
-background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 lightblue, stop: 1  blue);
-border: 0px;
-}
-QHeaderView
-{
-background: #d3d7cf;
-color: #555753;
-font-weight: bold;
-}
-QStatusBar
-{
-font-size: 8pt;
-color: #555753;
-}
-QMenuBar
-{
-background: transparent;
-border: 0px;
-}
-QToolBar
-{
-background: transparent;
-border: 0px;
-}
-QMainWindow
-{
-     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
-                                 stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);
-}
-QLabel
-{
-    font-size: 10pt;
-    text-align: center;
-     background: transparent;
-    color:#204a87;
-}
-QMessageBox
-{
-    font-size: 10pt;
-    text-align: center;
-     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
-                                 stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);
-    color:#204a87;
-}
-QPushButton{
-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 white, stop: 1 grey);
-border-style: solid;
-border-color: darkgrey;
-height: 26px;
-width: 66px;
-font-size: 8pt;
-border-width: 1px;
-border-radius: 6px;
-}
-QPushButton:hover:!pressed{
-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 lightblue, stop: 1  blue);
-border-style: solid;
-border-color: darkgrey;
-height: 26px;
-width: 66px;
-border-width: 1px;
-border-radius: 6px;
-}
-QPushButton:hover{
-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 lightgreen, stop: 1  green);
-border-style: solid;
-border-color: darkgrey;
-border-width: 1px;
-border-radius: 4px;
-}
-QToolButton
-{
-padding-left: 2px; padding-right: 2px;
-}
-    """
 
 
 if __name__ == '__main__':
