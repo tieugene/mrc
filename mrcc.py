@@ -253,15 +253,20 @@ class Terminal(cmd.Cmd):
 
     def do_get(self, arg):
         """Download file (ftp GET)\nUsage:
-        get <path> [<localfile> (default - same as src *Name*]"""
+        get <path> [<local_file_or_folder> (default - same as src *Name* into pwd]"""
         path = self.__norm_path(arg)
+        # 1. get meta
         rsp = self.__wrap(self.__mrc.entry_info(path))
         if rsp:
             assert rsp['type'] == 'file'
+            # 2. download body
             self.__mrc._file_get(path, rsp['name'])
 
-    def _do_put(self, args):
-        """Upload file (ftp PUT)"""
+    def do_put(self, args):
+        """Upload file (ftp PUT)\nUsage:
+        put localfile [<dst_file_or_folder> (default - same...)]"""
+        # 1. upload body
+        # 2. create meta
         self.__not_implemented()
 
     def do_cp(self, arg):

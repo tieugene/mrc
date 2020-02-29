@@ -1,3 +1,11 @@
+* O-Disk API?
+* Get file:
+  * chk sha1
+  * into stream by chunks
+    * https://dzone.com/articles/simple-examples-of-downloading-files-using-python)
+    * https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests
+  * sequence (append?)
+  * ... with partial sha1 (of string?)
 * Chunks:
   * upload files w/ 'chunk' option
   * download files sequence into one file
@@ -18,3 +26,6 @@
 * GUI:
   * https://github.com/j4321/tkFileBrowser
   * https://stackoverflow.com/questions/42131397/python-gui-tkinter-file-browser-and-state-the-file-selected-on-the-blank
+== Done ==
+* Chk anon upload into rw public (https://cloud.mail.ru/public/4JpA/Gw5ZCkkNL) - just for mail.ru accounts
+FHQyWVwQYF

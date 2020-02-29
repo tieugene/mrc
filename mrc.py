@@ -277,18 +277,19 @@ class MailRuCloudClient:
         :param dst_path:
         :return: Ok/403/404
         """
-        '''
-        response = self.session.get(self.__dURL[:-1] + path, stream=True)
-        with open(outfilename, "wb") as handle:
-            for data in tqdm(response.iter_content(chunk_size=1024), unit='KB', total=int(metadata['size'] / 1024)):
-                handle.write(data)
-        or:
-        open(outfilename, 'wb').write(requests.get(url).content)
-        '''
+        # TODO: chk sha1
         _dprint("Get '{}' from '{}' into '{}'...".format(path, self.__dURL[:-1], dst_path), end='')
-        rsp = self.__session.get(self.__dURL[:-1] + path)   # token is optional
+        # 1. simple way
+        # rsp = self.__session.get(self.__dURL[:-1] + path)   # token is optional
+        # 2. chunk way
+        rsp = self.__session.get(self.__dURL[:-1] + path, stream=True)   # token is optional
         if rsp:
-            open(dst_path, 'wb').write(rsp.content)
+            # 1.
+            # open(dst_path, 'wb').write(rsp.content)
+            # 2.
+            with open(dst_path, 'wb') as f:
+                for chunk in rsp.iter_content(chunk_size=1048576):   # 1MB
+                    f.write(chunk)
             _dprint("OK")
         else:
             _dprint("Oops {} ({}).".format(rsp.status_code, rsp.reason))
@@ -301,7 +302,9 @@ class MailRuCloudClient:
         :param resolve How to solve conflict - ignore (replace)/new name/reject
         :return:
         """
-        pass
+        # https://stackoverflow.com/questions/22567306/python-requests-file-upload
+        # https://ru.stackoverflow.com/questions/970759/python-requests-file-upload
+        # https://gist.github.com/yoavram/4351498
 
     def folder_add(self, path: str, resolve: str = None):
         """
